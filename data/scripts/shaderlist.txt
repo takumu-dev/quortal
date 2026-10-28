@@ -1,0 +1,3 @@
+// q3map2 and the editors read only the shader files listed here, and in
+// OpenArena's own list. The game reads every one
+quortal

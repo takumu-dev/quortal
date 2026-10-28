@@ -1694,7 +1694,7 @@ qboolean ValidBloodPool (vec3_t start)
 			VectorMA (x_pos, y, up, this_pos);
 			VectorMA (this_pos, -EXTRUDE_DIST*2, normal, end_pos);
 			
-			CG_Trace (&trace, this_pos, NULL, NULL, end_pos, -1, CONTENTS_SOLID);
+			CG_Trace (&trace, this_pos, NULL, NULL, end_pos, -1, MASK_SOLID);
 
 			
 			if (trace.entityNum < ENTITYNUM_WORLD) // may only land on world

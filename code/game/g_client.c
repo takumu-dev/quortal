@@ -478,7 +478,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 	VectorCopy (ent->r.absmin, body->r.absmin);
 	VectorCopy (ent->r.absmax, body->r.absmax);
 
-	body->clipmask = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+	body->clipmask = MASK_DEADSOLID;
 	body->r.contents = CONTENTS_CORPSE;
 	body->r.ownerNum = ent->s.number;
 

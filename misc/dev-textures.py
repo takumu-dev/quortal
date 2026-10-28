@@ -6,6 +6,9 @@ the usual texture scale of 0.5. floor_<colour> is a 64-unit grid with a tick
 every 8 units along its lines, and wall_<colour> adds an arrow and the label
 UP, pointing to the top of the texture. A map gives each room its own colour.
 
+plug is the editor image of the shader that fills a portal end's opening: a
+grid like the floors', in a colour of its own, labelled PLUG.
+
 Needs nothing but Python 3, and draws the same files every time.
 """
 
@@ -27,11 +30,16 @@ COLORS = {
     "gray": (136, 136, 136),
 }
 
-LABEL = "UP"
+PLUG_COLOR = (200, 72, 160)
+
 GLYPHS = {
-    "U": ["X...X", "X...X", "X...X", "X...X", "X...X", "X...X", ".XXX."],
+    "G": [".XXX.", "X...X", "X....", "X.XXX", "X...X", "X...X", ".XXX."],
+    "L": ["X....", "X....", "X....", "X....", "X....", "X....", "XXXXX"],
     "P": ["XXXX.", "X...X", "X...X", "XXXX.", "X....", "X....", "X...."],
+    "U": ["X...X", "X...X", "X...X", "X...X", "X...X", "X...X", ".XXX."],
 }
+GLYPH_WIDTH = 5
+GLYPH_HEIGHT = 7
 
 OUTPUT_DIR = pathlib.Path(__file__).resolve().parent.parent / "data" / "textures" / "quortal"
 
@@ -49,6 +57,23 @@ def fill(pixels, x0, y0, x1, y1, color):
     for y in range(y0, y1):
         for x in range(x0, x1):
             pixels[y][x] = color
+
+
+def text_width(text, scale, gap):
+    return len(text) * GLYPH_WIDTH * scale + (len(text) - 1) * gap
+
+
+def draw_text(pixels, text, x0, y0, scale, gap, color):
+    """Draw text with its top left corner at (x0, y0), each of its glyphs'
+    pixels drawn scale by scale, and gap pixels between glyphs."""
+    for glyph in text:
+        for row, line in enumerate(GLYPHS[glyph]):
+            for column, mark in enumerate(line):
+                if mark == "X":
+                    x = x0 + column * scale
+                    y = y0 + row * scale
+                    fill(pixels, x, y, x + scale, y + scale, color)
+        x0 += GLYPH_WIDTH * scale + gap
 
 
 def draw_grid(pixels, color):
@@ -82,17 +107,7 @@ def draw_up(pixels, color):
     fill(pixels, middle - 4, bottom, middle + 4, 84, color)
 
     # The label, each of its glyphs' pixels drawn 2 by 2
-    scale, gap = 2, 4
-    width = len(LABEL) * 5 * scale + (len(LABEL) - 1) * gap
-    x0 = middle - width // 2
-    for glyph in LABEL:
-        for row, line in enumerate(GLYPHS[glyph]):
-            for column, mark in enumerate(line):
-                if mark == "X":
-                    x = x0 + column * scale
-                    y = 92 + row * scale
-                    fill(pixels, x, y, x + scale, y + scale, color)
-        x0 += 5 * scale + gap
+    draw_text(pixels, "UP", middle - text_width("UP", 2, 4) // 2, 92, 2, 4, color)
 
 
 def write_png(path, pixels):
@@ -119,6 +134,12 @@ def main():
             if kind == "wall":
                 draw_up(pixels, tint(color, 0.55))
             write_png(OUTPUT_DIR / f"{kind}_{name}.png", pixels)
+
+    pixels = [[PLUG_COLOR] * SIZE for _ in range(SIZE)]
+    draw_grid(pixels, shade(PLUG_COLOR, 0.55))
+    draw_text(pixels, "PLUG", (SIZE - text_width("PLUG", 2, 4)) // 2,
+              (SIZE - GLYPH_HEIGHT * 2) // 2, 2, 4, tint(PLUG_COLOR, 0.55))
+    write_png(OUTPUT_DIR / "plug.png", pixels)
 
 
 if __name__ == "__main__":

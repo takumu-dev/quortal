@@ -174,7 +174,7 @@ static gentity_t *SpawnModelOnVictoryPad( gentity_t *pad, vec3_t offset, gentity
 	VectorCopy (ent->r.maxs, body->r.maxs);
 	VectorCopy (ent->r.absmin, body->r.absmin);
 	VectorCopy (ent->r.absmax, body->r.absmax);
-	body->clipmask = CONTENTS_SOLID | CONTENTS_PLAYERCLIP;
+	body->clipmask = MASK_DEADSOLID;
 	body->r.contents = CONTENTS_BODY;
 	body->r.ownerNum = ent->r.ownerNum;
 	body->takedamage = qfalse;
@@ -300,7 +300,7 @@ static gentity_t *SpawnPodium( void ) {
 	podium->classname = "podium";
 	podium->s.eType = ET_GENERAL;
 	podium->s.number = podium - g_entities;
-	podium->clipmask = CONTENTS_SOLID;
+	podium->clipmask = MASK_SOLID;
 	podium->r.contents = CONTENTS_SOLID;
 	podium->s.modelindex = G_ModelIndex( SP_PODIUM_MODEL );
 

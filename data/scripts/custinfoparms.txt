@@ -1,0 +1,11 @@
+// quortal's own surface parameters, which q3map2 reads when it's given
+// -custinfoparms, as quortal's map builds always are
+
+// Contents flags
+{
+	plug		0x400	// CONTENTS_PLUG: fills a portal end's opening
+}
+
+// Surface flags
+{
+}
