@@ -17,8 +17,8 @@
 #     [vm.c](../code/qcommon/vm.c):". It must be whole lines of that file, as
 #     they are there, with none left out;
 #   - the list under a heading "How it was built" is a step's commits, one to
-#     an item. Each must link to its commit, which must be in the history of
-#     COMMIT.
+#     an item, as list_commits.cmake prints them. Each must link to its
+#     commit, which must be in the history of COMMIT.
 #
 # Code is read for none of these, except where it's all of a link's text
 
