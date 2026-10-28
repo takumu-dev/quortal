@@ -20,8 +20,8 @@ quortal's own data
 
 Apart from the third-party files listed below, the files in quortal's data
 folder are quortal's own work, under the GNU General Public License,
-version 2 (GPL-2.0). Its text is in COPYING.txt, at the root of quortal's
-source.
+version 2 or (at your option) any later version (GPL-2.0-or-later). The
+text of version 2 is in COPYING.txt, at the root of quortal's source.
 
 Third-party files
 -----------------
