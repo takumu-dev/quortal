@@ -3055,7 +3055,7 @@ static void UI_Update(const char *name) {
 			break;
 			case 16:
 				trap_Cvar_SetValue( "r_depthbits", 16 );
-				trap_Cvar_SetValue( "r_stencilbits", 0 );
+				trap_Cvar_SetValue( "r_stencilbits", 8 );
 			break;
 			case 32:
 				trap_Cvar_SetValue( "r_depthbits", 24 );
@@ -3137,7 +3137,7 @@ static void UI_Update(const char *name) {
 				trap_Cvar_SetValue( "r_lodbias", 2 );
 				trap_Cvar_SetValue( "r_colorbits", 16 );
 				trap_Cvar_SetValue( "r_depthbits", 16 );
-				trap_Cvar_SetValue( "r_stencilbits", 0 );
+				trap_Cvar_SetValue( "r_stencilbits", 8 );
 				trap_Cvar_SetValue( "r_mode", 3 );
 				trap_Cvar_Set( "ui_videomode", "640x480" );
 				trap_Cvar_SetValue( "r_picmip", 2 );

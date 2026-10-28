@@ -705,7 +705,7 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 	case 1:
 		trap_Cvar_SetValue( "r_colorbits", 16 );
 		trap_Cvar_SetValue( "r_depthbits", 16 );
-		trap_Cvar_SetValue( "r_stencilbits", 0 );
+		trap_Cvar_SetValue( "r_stencilbits", 8 );
 		break;
 	case 2:
 		trap_Cvar_SetValue( "r_colorbits", 32 );
