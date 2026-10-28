@@ -117,16 +117,25 @@ static void BG_ReadPortalEnd( const portalEndKeys_t *keys, portalEnd_t *end ) {
 
 	BG_ParseNumbers( keys->origin, end->origin, 3 );
 
+	// the frame's keys are read in turn, until one can't be
 	VectorClear( angles );
-	if ( keys->angles[0] ) {
-		BG_ParseNumbers( keys->angles, angles, 3 );
-	} else if ( keys->angle[0] ) {
-		BG_ParseNumbers( keys->angle, &angles[YAW], 1 );
+	if ( !BG_ParseNumbers( keys->width, &end->width, 1 ) || end->width <= 0 ) {
+		end->rule = PR_NO_WIDTH;
+	} else if ( !BG_ParseNumbers( keys->height, &end->height, 1 ) || end->height <= 0 ) {
+		end->rule = PR_NO_HEIGHT;
+	} else if ( keys->angles[0] && keys->angle[0] ) {
+		end->rule = PR_ANGLE_AND_ANGLES;
+	} else if ( keys->angles[0] && !BG_ParseNumbers( keys->angles, angles, 3 ) ) {
+		end->rule = PR_BAD_ANGLES;
+	} else if ( keys->angle[0] && !BG_ParseNumbers( keys->angle, &angles[YAW], 1 ) ) {
+		end->rule = PR_BAD_ANGLES;
 	}
 	AnglesToAxis( angles, end->axis );
 
-	end->width = atof( keys->width );
-	end->height = atof( keys->height );
+	// an end with no usable frame is skipped
+	if ( end->rule != PR_NONE ) {
+		end->state = PE_SKIPPED;
+	}
 }
 
 /*
@@ -258,7 +267,8 @@ BG_CheckPortalEnds
 
 Pairs the ends and checks them, giving each its state, and the rule it broke
 if it broke one. A portal is open only when both its ends broke none: an end
-that broke one seals its partner too
+that broke one seals its partner, and an end that was skipped as it was read
+still pairs, to seal its partner
 ================
 */
 static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
@@ -270,7 +280,7 @@ static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
 	for ( i = 0 ; i < numEnds ; i++ ) {
 		end = &ends[i];
 		end->partner = BG_PairPortalEnd( ends, numEnds, i, &rule );
-		if ( end->partner == -1 ) {
+		if ( end->partner == -1 && end->rule == PR_NONE ) {
 			end->rule = rule;
 		}
 	}
@@ -284,6 +294,9 @@ static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
 		}
 
 		partner = &ends[end->partner];
+		if ( end->rule != PR_NONE || partner->rule != PR_NONE ) {
+			continue;
+		}
 		if ( Q_stricmp( end->targetname, partner->targetname ) > 0 ) {
 			continue;
 		}
@@ -294,6 +307,9 @@ static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
 
 	for ( i = 0 ; i < numEnds ; i++ ) {
 		end = &ends[i];
+		if ( end->state == PE_SKIPPED ) {
+			continue;
+		}
 		if ( end->rule != PR_NONE ) {
 			end->state = PE_SEALED;
 			continue;
@@ -319,6 +335,14 @@ Says which rule end broke, or returns NULL if it broke none
 */
 static const char *BG_PortalEndRule( const portalEnd_t *end ) {
 	switch ( end->rule ) {
+	case PR_NO_WIDTH:
+		return "has no width";
+	case PR_NO_HEIGHT:
+		return "has no height";
+	case PR_ANGLE_AND_ANGLES:
+		return "has both angle and angles";
+	case PR_BAD_ANGLES:
+		return "has unreadable angles";
 	case PR_NO_TARGETNAME:
 		return "doesn't pair, as it has no targetname";
 	case PR_SHARED_TARGETNAME:

@@ -732,12 +732,19 @@ through them. The map still loads.
 
 typedef enum {
 	PE_OPEN,				// seen and passed through
-	PE_SEALED				// a painted wall: no view, no visibility point and no crossing
+	PE_SEALED,				// a painted wall: no view, no visibility point and no crossing
+	PE_SKIPPED				// no usable frame, so not an end at all, and its partner is sealed
 } portalEndState_t;
 
 // the rules a portal end can break
 typedef enum {
 	PR_NONE,
+
+	// an end has a frame to be read from its keys
+	PR_NO_WIDTH,
+	PR_NO_HEIGHT,
+	PR_ANGLE_AND_ANGLES,
+	PR_BAD_ANGLES,
 
 	// the ends of a portal target each other, by names no other end has
 	PR_NO_TARGETNAME,

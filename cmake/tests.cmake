@@ -51,7 +51,11 @@ if(BUILD_SERVER)
     set(TEST_SEALED_WARNINGS
         "unpaired doesn't pair"
         "own_partner targets itself"
-        "size_mismatch isn't the size of its partner")
+        "size_mismatch isn't the size of its partner"
+        "no_width has no width"
+        "no_height has no height"
+        "bad_angles has unreadable angles"
+        "angle_and_angles has both angle and angles")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")
