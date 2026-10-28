@@ -27,18 +27,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // A user mod should never modify this file
 
 #ifdef STANDALONE
-  #define PRODUCT_NAME				"iofoo3"
-  #define BASEGAME					"foobar"
-  #define CLIENT_WINDOW_TITLE		"changeme"
-  #define CLIENT_WINDOW_MIN_TITLE	"changeme2"
-  #define HOMEPATH_NAME_UNIX_LEGACY	".foo"
-  #define HOMEPATH_NAME				"FooBar"
-  #define GAMENAME_FOR_MASTER		"foobar"	// must NOT contain whitespace
-  #define CINEMATICS_LOGO		"foologo.roq"
-  #define CINEMATICS_INTRO		"intro.roq"
+  #define PRODUCT_NAME				"quortal"
+  #define BASEGAME					"quortal"
+  #define CLIENT_WINDOW_TITLE		"quortal"
+  #define CLIENT_WINDOW_MIN_TITLE	"quortal"
+  #define HOMEPATH_NAME_UNIX_LEGACY	".quortal"
+  #define HOMEPATH_NAME				"quortal"
+  #define GAMENAME_FOR_MASTER		"quortal"	// must NOT contain whitespace
+//  #define CINEMATICS_LOGO		"foologo.roq"
+//  #define CINEMATICS_INTRO		"intro.roq"
 //  #define LEGACY_PROTOCOL	// You probably don't need this for your standalone game
 //  #define PROTOCOL_HANDLER		"foobar"
-  #define CONFIG_PREFIX			"fooconfig"
+  #define CONFIG_PREFIX			"quortal"
 #else
   #define PRODUCT_NAME				"ioq3"
   #define BASEGAME					"baseq3"
