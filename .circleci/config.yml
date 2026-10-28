@@ -1,16 +1,17 @@
-# Builds quortal on Linux, Windows and macOS. On Linux and Windows it also
-# fetches OpenArena's data and q3map2, builds the test maps and runs every
-# check with ctest. Neither has a GPU, so the client renders in software,
-# with Mesa's llvmpipe: on Linux from Ubuntu's packages, under xvfb-run, and
-# on Windows from mesa-dist-win, which the checks load beside the client.
-# macOS builds no maps, so it's built and nothing more.
+# Checks quortal's docs, and builds quortal on Linux, Windows and macOS. On
+# Linux and Windows it also fetches OpenArena's data and q3map2, builds the
+# test maps and runs every check with ctest. Neither has a GPU, so the
+# client renders in software, with Mesa's llvmpipe: on Linux from Ubuntu's
+# packages, under xvfb-run, and on Windows from mesa-dist-win, which the
+# checks load beside the client. macOS builds no maps, so it's built and
+# nothing more.
 #
-# Windows and macOS cost far more of the credits than Linux, so all three
-# run only for develop and for tags. A push to any other branch runs Linux
-# at once, while Windows and macOS each wait for someone to approve
-# approve-windows or approve-macos, in the web app or with circleci run
-# approve. A push to main runs nothing: each comes with its release's tag,
-# whose pipeline is of the same commit.
+# Windows and macOS cost far more of the credits than Linux, so all four
+# jobs run only for develop and for tags. A push to any other branch runs
+# the docs and Linux at once, while Windows and macOS each wait for someone
+# to approve approve-windows or approve-macos, in the web app or with
+# circleci run approve. A push to main runs nothing: each comes with its
+# release's tag, whose pipeline is of the same commit.
 #
 # Only the downloads are cached, each under a key that names the SHA-256 its
 # fetch script pins, so pinning a new download means changing its keys here
@@ -41,6 +42,19 @@ commands:
               build/tests.dir/<< parameters.config >>/*/home/quortal/qconsole.log
 
 jobs:
+  # The docs check needs only CMake, which the image has, and git's history,
+  # which the checkout holds: it's blobless, so it has every commit, though
+  # not the files of any but the one checked out
+  docs:
+    docker:
+      - image: cimg/base:2026.10-24.04
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Check the docs
+          command: cmake -P cmake/utils/check_docs.cmake
+
   linux:
     docker:
       - image: cimg/base:2026.10-24.04
@@ -185,10 +199,12 @@ workflows:
         - << pipeline.git.tag >>
     jobs:
       # A job runs for a tag only when its filters name tags
-      - linux:
+      - docs:
           filters: &tags
             tags:
               only: /.*/
+      - linux:
+          filters: *tags
       - windows:
           filters: *tags
       - macos:
@@ -201,6 +217,7 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
         - << pipeline.git.tag >>
     jobs:
+      - docs
       - linux
       - approve-windows:
           type: approval
