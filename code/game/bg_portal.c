@@ -230,6 +230,10 @@ static int BG_PairPortalEnd( const portalEnd_t *ends, int numEnds, int endNum, p
 		*rule = PR_NO_TARGET;
 		return -1;
 	}
+	if ( !Q_stricmp( end->target, end->targetname ) ) {
+		*rule = PR_OWN_PARTNER;
+		return -1;
+	}
 
 	partner = BG_FindPortalEnd( ends, numEnds, end->target );
 	if ( partner == -1 ) {
@@ -310,6 +314,8 @@ static const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return va( "doesn't pair, as more than one end is named \"%s\"", end->target );
 	case PR_NOT_MUTUAL:
 		return va( "doesn't pair, as \"%s\" doesn't target it", end->target );
+	case PR_OWN_PARTNER:
+		return "targets itself";
 	default:
 		return NULL;
 	}

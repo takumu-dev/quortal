@@ -745,7 +745,10 @@ typedef enum {
 	PR_NO_TARGET,
 	PR_NO_SUCH_TARGET,
 	PR_SHARED_TARGET,
-	PR_NOT_MUTUAL
+	PR_NOT_MUTUAL,
+
+	// and no end is its own partner
+	PR_OWN_PARTNER
 } portalRule_t;
 
 typedef struct {

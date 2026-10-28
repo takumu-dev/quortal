@@ -49,7 +49,8 @@ if(BUILD_SERVER)
     # and the server warns about that end once, naming the rule. It warns
     # about nothing else
     set(TEST_SEALED_WARNINGS
-        "unpaired doesn't pair")
+        "unpaired doesn't pair"
+        "own_partner targets itself")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")
