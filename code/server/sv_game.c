@@ -412,6 +412,9 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 			s = COM_Parse( &sv.entityParsePoint );
 			Q_strncpyz( VMA(1), s, args[2] );
 			if ( !sv.entityParsePoint && !s[0] ) {
+				// start again, as the renderer does for cgame, so that
+				// the game can read the entity string more than once
+				sv.entityParsePoint = CM_EntityString();
 				return qfalse;
 			} else {
 				return qtrue;
