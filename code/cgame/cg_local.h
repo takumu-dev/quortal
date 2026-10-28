@@ -1073,6 +1073,8 @@ typedef struct {
 	// media
 	cgMedia_t		media;
 
+	int				numPortalEnds;
+	portalEnd_t		portalEnds[MAX_PORTAL_ENDS];
 } cgs_t;
 
 //==============================================================================
@@ -1324,6 +1326,11 @@ void CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec
 					 int skipNumber, int mask );
 void CG_PredictPlayerState( void );
 void CG_LoadDeferredPlayers( void );
+
+//
+// cg_portal.c
+//
+void CG_ReadPortalEnds( void );
 
 
 //

@@ -31,6 +31,7 @@ set(CGAME_SOURCES
     ${SOURCE_DIR}/cgame/cg_players.c
     ${SOURCE_DIR}/cgame/cg_playerstate.c
     ${SOURCE_DIR}/cgame/cg_predict.c
+    ${SOURCE_DIR}/cgame/cg_portal.c
     ${SOURCE_DIR}/cgame/cg_scoreboard.c
     ${SOURCE_DIR}/cgame/cg_servercmds.c
     ${SOURCE_DIR}/cgame/cg_snapshot.c
