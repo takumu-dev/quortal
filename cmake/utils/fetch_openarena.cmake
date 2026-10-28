@@ -42,6 +42,8 @@ if(NOT GAME_DIR)
     message(FATAL_ERROR "GAME_DIR must be set")
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/fetch_to_cache.cmake)
+
 set(MISSING_PAKS "")
 foreach(PAK IN LISTS PAKS)
     if(NOT EXISTS ${GAME_DIR}/${PAK})
@@ -54,77 +56,10 @@ if(NOT MISSING_PAKS)
     return()
 endif()
 
-if(CMAKE_HOST_WIN32)
-    file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}" CACHE_DIR)
-elseif(CMAKE_HOST_APPLE)
-    set(CACHE_DIR "$ENV{HOME}/Library/Caches")
-elseif(NOT "$ENV{XDG_CACHE_HOME}" STREQUAL "")
-    set(CACHE_DIR "$ENV{XDG_CACHE_HOME}")
-else()
-    set(CACHE_DIR "$ENV{HOME}/.cache")
-endif()
-
-if(NOT IS_ABSOLUTE "${CACHE_DIR}")
-    message(FATAL_ERROR "Can't find the user's cache folder")
-endif()
-
-set(ZIP_FILE ${CACHE_DIR}/quortal/${ZIP_NAME})
-set(PART_FILE ${ZIP_FILE}.part)
-
-# Sets REASON to why FILE isn't OpenArena's zip, or to nothing if it is
-function(check_zip FILE REASON)
-    file(SIZE ${FILE} SIZE)
-    if(NOT SIZE EQUAL ZIP_SIZE)
-        set(${REASON} "it's ${SIZE} bytes, not ${ZIP_SIZE}" PARENT_SCOPE)
-        return()
-    endif()
-
-    file(SHA256 ${FILE} SHA256)
-    if(NOT SHA256 STREQUAL ZIP_SHA256)
-        set(${REASON} "its SHA-256 is ${SHA256}, not ${ZIP_SHA256}" PARENT_SCOPE)
-        return()
-    endif()
-
-    set(${REASON} "" PARENT_SCOPE)
-endfunction()
-
-if(EXISTS ${ZIP_FILE})
-    check_zip(${ZIP_FILE} REASON)
-    if(REASON)
-        message(WARNING "Discarding ${ZIP_FILE}: ${REASON}")
-        file(REMOVE ${ZIP_FILE})
-    endif()
-endif()
-
-if(NOT EXISTS ${ZIP_FILE})
-    foreach(URL IN LISTS URLS)
-        message(STATUS "Downloading ${URL}")
-        file(DOWNLOAD ${URL} ${PART_FILE}
-            STATUS STATUS
-            INACTIVITY_TIMEOUT 60
-            SHOW_PROGRESS)
-
-        list(GET STATUS 0 STATUS_CODE)
-        if(STATUS_CODE EQUAL 0)
-            check_zip(${PART_FILE} REASON)
-        else()
-            list(GET STATUS 1 REASON)
-        endif()
-
-        if(NOT REASON)
-            file(RENAME ${PART_FILE} ${ZIP_FILE})
-            break()
-        endif()
-
-        message(WARNING "Couldn't download ${URL}: ${REASON}")
-        file(REMOVE ${PART_FILE})
-    endforeach()
-endif()
-
-if(NOT EXISTS ${ZIP_FILE})
-    message(FATAL_ERROR "Couldn't download ${ZIP_NAME}. "
-        "The steps to fetch it by hand are at the top of ${CMAKE_CURRENT_LIST_FILE}")
-endif()
+fetch_to_cache(${ZIP_NAME} ZIP_FILE
+    SHA256 ${ZIP_SHA256}
+    SIZE ${ZIP_SIZE}
+    URLS ${URLS})
 
 # Extract next to GAME_DIR's paks, so that each one only appears there whole
 set(STAGING_DIR ${GAME_DIR}/.openarena)
