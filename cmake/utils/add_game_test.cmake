@@ -5,9 +5,11 @@ include_guard(GLOBAL)
 
 # Adds the check NAME, labelled LABEL, which runs the target GAME with ARGS.
 # It passes when the game exits cleanly within TIMEOUT seconds, with each of
-# EXPECT somewhere in its console log
+# EXPECT somewhere in its console log. With LINES, a regular expression, the
+# log's lines that match it must be matched one for one by the regular
+# expressions in EXPECT_LINES, and with no EXPECT_LINES there must be none
 function(add_game_test NAME)
-    cmake_parse_arguments(ARG "" "GAME;LABEL;TIMEOUT" "ARGS;EXPECT" ${ARGN})
+    cmake_parse_arguments(ARG "" "GAME;LABEL;TIMEOUT;LINES" "ARGS;EXPECT;EXPECT_LINES" ${ARGN})
 
     set(RUN_GAME_SCRIPT ${CMAKE_SOURCE_DIR}/cmake/utils/run_game.cmake)
 
@@ -27,6 +29,8 @@ function(add_game_test NAME)
             -DOPENGL_DIR=${TEST_OPENGL_DIR}
             "-DARGS=${ARG_ARGS}"
             "-DEXPECT=${ARG_EXPECT}"
+            "-DLINES=${ARG_LINES}"
+            "-DEXPECT_LINES=${ARG_EXPECT_LINES}"
             -P ${RUN_GAME_SCRIPT})
 
     # The game is stopped at TIMEOUT, so that its log can still be shown.

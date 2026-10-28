@@ -2,7 +2,10 @@
 
 # GAME, BASEGAME, RUN_DIR and TIMEOUT must be set via -D. GAME is run with
 # ARGS, and the check passes when it exits cleanly within TIMEOUT seconds,
-# with each of EXPECT somewhere in its console log
+# with each of EXPECT somewhere in its console log. When LINES is set, the
+# log's lines that match it must also be those of EXPECT_LINES, one for one:
+# each regular expression in EXPECT_LINES matches exactly one of them, and
+# there are no more of them than there are of EXPECT_LINES
 #
 # Each run starts from an empty RUN_DIR, and writes nothing outside it. The
 # game is given:
@@ -121,6 +124,36 @@ foreach(TEXT IN LISTS EXPECT)
         list(APPEND FAILURES "its console log has no \"${TEXT}\"")
     endif()
 endforeach()
+
+if(LINES)
+    # Split into lines first, as . matches a line's end too
+    string(REGEX MATCHALL "[^\n]+" LOG_LINES "${LOG}")
+    set(MATCHED_LINES "")
+    foreach(LINE IN LISTS LOG_LINES)
+        if(LINE MATCHES "${LINES}")
+            list(APPEND MATCHED_LINES "${LINE}")
+        endif()
+    endforeach()
+
+    foreach(EXPECTED IN LISTS EXPECT_LINES)
+        set(MATCH_COUNT 0)
+        foreach(LINE IN LISTS MATCHED_LINES)
+            if(LINE MATCHES "${EXPECTED}")
+                math(EXPR MATCH_COUNT "${MATCH_COUNT} + 1")
+            endif()
+        endforeach()
+
+        if(NOT MATCH_COUNT EQUAL 1)
+            list(APPEND FAILURES "${MATCH_COUNT} of its lines with \"${LINES}\" match \"${EXPECTED}\", not 1")
+        endif()
+    endforeach()
+
+    list(LENGTH MATCHED_LINES LINE_COUNT)
+    list(LENGTH EXPECT_LINES EXPECTED_COUNT)
+    if(NOT LINE_COUNT EQUAL EXPECTED_COUNT)
+        list(APPEND FAILURES "${LINE_COUNT} of its lines have \"${LINES}\", not ${EXPECTED_COUNT}")
+    endif()
+endif()
 
 if(FAILURES)
     # The log starts once the filesystem is up, so a game that fails before
