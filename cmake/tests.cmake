@@ -10,6 +10,13 @@ include(utils/add_game_test)
 
 enable_testing()
 
+# On Windows, a check's client can load other OpenGL DLLs than the system's,
+# such as Mesa's, which render in software on a machine with no GPU and
+# which cmake/utils/fetch_mesa.cmake fetches
+if(WIN32)
+    set(TEST_OPENGL_DIR "" CACHE PATH "OpenGL DLLs for the checks' client to load")
+endif()
+
 set(MAP_TESTS "")
 
 if(BUILD_SERVER)

@@ -24,6 +24,7 @@ function(add_game_test NAME)
             -DRUN_DIR=${CMAKE_BINARY_DIR}/tests.dir/$<CONFIG>/${NAME}
             -DTIMEOUT=${ARG_TIMEOUT}
             -DCLIENT=${CLIENT}
+            -DOPENGL_DIR=${TEST_OPENGL_DIR}
             "-DARGS=${ARG_ARGS}"
             "-DEXPECT=${ARG_EXPECT}"
             -P ${RUN_GAME_SCRIPT})
