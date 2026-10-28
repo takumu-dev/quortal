@@ -779,6 +779,7 @@ typedef struct {
 
 int			BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
 				void (*warn)( const char *warning ), portalEnd_t *ends, int maxEnds );
+const char	*BG_PortalEndRule( const portalEnd_t *end );
 
 
 #define ARENAS_PER_TIER		4

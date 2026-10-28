@@ -428,6 +428,7 @@ char *G_NewString( const char *string );
 // g_portal.c
 //
 void G_ReadPortalEnds( void );
+void G_ListPortalEnds( void );
 
 //
 // g_cmds.c

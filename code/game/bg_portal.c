@@ -333,7 +333,7 @@ BG_PortalEndRule
 Says which rule end broke, or returns NULL if it broke none
 ================
 */
-static const char *BG_PortalEndRule( const portalEnd_t *end ) {
+const char *BG_PortalEndRule( const portalEnd_t *end ) {
 	switch ( end->rule ) {
 	case PR_NO_WIDTH:
 		return "has no width";

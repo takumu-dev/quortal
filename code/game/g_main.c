@@ -81,6 +81,7 @@ vmCvar_t	pmove_fixed;
 vmCvar_t	pmove_msec;
 vmCvar_t	g_rankings;
 vmCvar_t	g_listEntity;
+vmCvar_t	g_listPortalEnds;
 vmCvar_t	g_localTeamPref;
 #ifdef MISSIONPACK
 vmCvar_t	g_obeliskHealth;
@@ -157,6 +158,7 @@ static cvarTable_t		gameCvarTable[] = {
 
 	{ &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_listEntity, "g_listEntity", "0", 0, 0, qfalse },
+	{ &g_listPortalEnds, "g_listPortalEnds", "0", CVAR_CHEAT, 0, qfalse },
 
 #ifdef MISSIONPACK
 	{ &g_obeliskHealth, "g_obeliskHealth", "2500", 0, 0, qfalse },
@@ -1895,5 +1897,10 @@ void G_RunFrame( int levelTime ) {
 			G_Printf("%4i: %s\n", i, g_entities[i].classname);
 		}
 		trap_Cvar_Set("g_listEntity", "0");
+	}
+
+	if (g_listPortalEnds.integer) {
+		G_ListPortalEnds();
+		trap_Cvar_Set("g_listPortalEnds", "0");
 	}
 }

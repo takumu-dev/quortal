@@ -46,3 +46,34 @@ void G_ReadPortalEnds( void ) {
 	level.numPortalEnds = BG_LoadPortalEnds( trap_GetEntityToken, G_PortalEndWarning,
 		level.portalEnds, MAX_PORTAL_ENDS );
 }
+
+/*
+================
+G_ListPortalEnds
+
+Prints every portal end, with its verdict, for g_listPortalEnds
+================
+*/
+void G_ListPortalEnds( void ) {
+	portalEnd_t	*end;
+	const char	*verdict;
+	int			i;
+
+	G_Printf( "%i portal ends:\n", level.numPortalEnds );
+
+	for ( i = 0 ; i < level.numPortalEnds ; i++ ) {
+		end = &level.portalEnds[i];
+
+		if ( end->state == PE_OPEN ) {
+			verdict = va( "open, paired with \"%s\"", end->target );
+		} else if ( end->state == PE_SKIPPED ) {
+			verdict = va( "skipped: it %s", BG_PortalEndRule( end ) );
+		} else if ( end->rule != PR_NONE ) {
+			verdict = va( "sealed: it %s", BG_PortalEndRule( end ) );
+		} else {
+			verdict = va( "sealed by its partner \"%s\"", end->target );
+		}
+
+		G_Printf( "%3i: \"%s\" at %s: %s\n", i, end->targetname, vtos( end->origin ), verdict );
+	}
+}
