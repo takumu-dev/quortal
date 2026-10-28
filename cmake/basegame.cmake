@@ -166,21 +166,26 @@ if(BUILD_GAME_QVMS)
     set(GAME_MODULE_QVM_BASEGAME ${GAME_MODULE}qvm_${BASEGAME})
     set(UI_MODULE_QVM_BASEGAME ${UI_MODULE}qvm_${BASEGAME})
 
+    # The QVMs go into quortal.pk3 only, never loose into the game folder, so
+    # each one is loaded from the same file whether the server is pure or not
     add_qvm(${CGAME_MODULE_QVM_BASEGAME}
         DEFINITIONS CGAME ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${CGAME_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${CGAME_SOURCES_BASEGAME} ${CGAME_QVM_SOURCES})
 
     add_qvm(${GAME_MODULE_QVM_BASEGAME}
         DEFINITIONS QAGAME ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${GAME_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${GAME_SOURCES_BASEGAME} ${GAME_QVM_SOURCES})
 
     add_qvm(${UI_MODULE_QVM_BASEGAME}
         DEFINITIONS UI ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${UI_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${UI_SOURCES_BASEGAME} ${UI_QVM_SOURCES})
 endif()

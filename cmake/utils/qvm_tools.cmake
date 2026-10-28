@@ -5,6 +5,7 @@ if(NOT BUILD_GAME_QVMS)
 endif()
 
 include(ExternalProject)
+include(utils/add_pk3)
 
 set(TOOLS_DIR ${CMAKE_BINARY_DIR}/tools)
 
@@ -31,9 +32,15 @@ ExternalProject_Add(qvm_tools
 
 function(add_qvm MODULE_NAME)
     list(REMOVE_AT ARGV 0)
-    cmake_parse_arguments(ARG "" "" "DEFINITIONS;OUTPUT_NAME;OUTPUT_DIRECTORY;SOURCES" ${ARGV})
+    cmake_parse_arguments(ARG "" "" "DEFINITIONS;OUTPUT_NAME;OUTPUT_DIRECTORY;PK3;SOURCES" ${ARGV})
 
-    set(QVM_OUTPUT_DIR ${CMAKE_BINARY_DIR}/$<CONFIG>)
+    # A QVM for a pk3 is built into that pk3's build folder, OUTPUT_DIRECTORY
+    # being its path in the pk3, and only installed inside the pk3
+    if(ARG_PK3)
+        get_pk3_build_dir(${ARG_PK3} QVM_OUTPUT_DIR)
+    else()
+        set(QVM_OUTPUT_DIR ${CMAKE_BINARY_DIR}/$<CONFIG>)
+    endif()
     if(ARG_OUTPUT_DIRECTORY)
         set(QVM_OUTPUT_DIR ${QVM_OUTPUT_DIR}/${ARG_OUTPUT_DIRECTORY})
     endif()
@@ -85,7 +92,9 @@ function(add_qvm MODULE_NAME)
     string(REGEX REPLACE "[^A-Za-z0-9]" "_" TARGET_NAME ${MODULE_NAME})
     add_custom_target(${TARGET_NAME} ALL DEPENDS ${QVM_FILE})
 
-    if(ARG_OUTPUT_DIRECTORY)
+    if(ARG_PK3)
+        add_pk3_files(${ARG_PK3} ${TARGET_NAME} ${QVM_FILE})
+    elseif(ARG_OUTPUT_DIRECTORY)
         install(FILES ${QVM_FILE} DESTINATION ${ARG_OUTPUT_DIRECTORY})
     endif()
 endfunction()
