@@ -40,6 +40,8 @@ vm_t	*currentVM = NULL;
 vm_t	*lastVM    = NULL;
 int		vm_debugLevel;
 
+static cvar_t	*vm_showLoad;
+
 // used by Com_Error to get rid of running vm's before longjmp
 static int forced_unload;
 
@@ -73,6 +75,9 @@ void VM_Init( void ) {
 	Cvar_Get( "vm_cgame", "2", CVAR_ARCHIVE );	// !@# SHIP WITH SET TO 2
 	Cvar_Get( "vm_game", "2", CVAR_ARCHIVE );	// !@# SHIP WITH SET TO 2
 	Cvar_Get( "vm_ui", "2", CVAR_ARCHIVE );		// !@# SHIP WITH SET TO 2
+
+	vm_showLoad = Cvar_Get( "vm_showLoad", "0", CVAR_CHEAT );
+	Cvar_SetDescription( vm_showLoad, "Show which file each game module is loaded from, and which pk3 holds it" );
 
 	Cmd_AddCommand ("vmprofile", VM_VmProfile_f );
 	Cmd_AddCommand ("vminfo", VM_VmInfo_f );
@@ -518,6 +523,9 @@ vmHeader_t *VM_LoadQVM( vm_t *vm, qboolean alloc, qboolean unpure)
 		}
 	}
 
+	if(vm_showLoad->integer)
+		Com_Printf("%s loaded from \"%s\" in \"%s\"\n", vm->name, filename, FS_SearchPathName(vm->searchPath));
+
 	return header.h;
 }
 
@@ -623,6 +631,10 @@ vm_t *VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 			if(vm->dllHandle)
 			{
 				vm->systemCall = systemCalls;
+
+				if(vm_showLoad->integer)
+					Com_Printf("%s loaded from \"%s\"\n", module, filename);
+
 				return vm;
 			}
 			

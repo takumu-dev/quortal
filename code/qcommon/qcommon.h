@@ -736,6 +736,7 @@ void	FS_FilenameCompletion( const char *dir, const char *ext, char *filter,
 
 const char *FS_GetCurrentGameDir(void);
 qboolean FS_Which(const char *filename, void *searchPath);
+const char *FS_SearchPathName(void *searchPath);
 
 /*
 ==============================================================

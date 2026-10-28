@@ -2829,6 +2829,24 @@ qboolean FS_Which(const char *filename, void *searchPath)
 
 /*
 ============
+FS_SearchPathName
+
+Returns the pk3 or directory that a search path reads from
+============
+*/
+
+const char *FS_SearchPathName(void *searchPath)
+{
+	searchpath_t *search = searchPath;
+
+	if(search->pack)
+		return search->pack->pakFilename;
+
+	return search->dir->fullpath;
+}
+
+/*
+============
 FS_Which_f
 ============
 */
