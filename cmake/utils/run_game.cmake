@@ -14,6 +14,11 @@
 #   - on Linux and the BSDs, a PATH starting with zenity, kdialog and
 #     xmessage programs that exit at once, so that an error dialog never
 #     waits for a click. On Windows one waits for the timeout.
+#
+# The client, when CLIENT is set, opens a 640x480 window without MSAA, and
+# every frame moves the game on by 8 msec, however long it took. On Linux
+# and the BSDs without a display, it runs under xvfb-run, and without that
+# the check is skipped
 
 foreach(VAR GAME BASEGAME RUN_DIR TIMEOUT)
     if(NOT ${VAR})
@@ -44,8 +49,28 @@ endif()
 set(COMMAND ${GAME}
     +set fs_basepath ${BASE_DIR}
     +set fs_homepath ${HOME_DIR}
-    +set logfile 2
-    ${ARGS})
+    +set logfile 2)
+
+if(CLIENT)
+    list(APPEND COMMAND
+        +set r_fullscreen 0
+        +set r_mode 3
+        +set r_ext_multisample 0
+        +set fixedtime 8)
+
+    if(CMAKE_HOST_UNIX AND NOT CMAKE_HOST_APPLE
+            AND "$ENV{DISPLAY}" STREQUAL "" AND "$ENV{WAYLAND_DISPLAY}" STREQUAL "")
+        find_program(XVFB_RUN xvfb-run)
+        if(NOT XVFB_RUN)
+            message("Skipped: there's no display to open a window on, and no xvfb-run to make one")
+            return()
+        endif()
+
+        list(PREPEND COMMAND ${XVFB_RUN} -a -s "-screen 0 640x480x24")
+    endif()
+endif()
+
+list(APPEND COMMAND ${ARGS})
 
 execute_process(
     COMMAND ${COMMAND}
