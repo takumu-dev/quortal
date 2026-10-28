@@ -106,6 +106,7 @@ include(q3map2)
 include(maps)
 include(pk3)
 include(openarena)
+include(tests)
 
 include(post_configure)
 include(installer)
