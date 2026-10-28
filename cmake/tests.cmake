@@ -72,6 +72,19 @@ if(BUILD_SERVER)
         LINES "WARNING: .*portal end"
         EXPECT_LINES ${TEST_SEALED_WARNING_LINES})
     list(APPEND MAP_TESTS server_warns_once_per_test_sealed_booth)
+
+    # test_first's portal is good: listed, both its ends are open and pair
+    # with each other, and the server warns about neither
+    add_game_test(server_finds_test_first_portal_open
+        GAME ${SERVER_BINARY}
+        LABEL server
+        TIMEOUT 60
+        ARGS +set g_listPortalEnds 1 +devmap test_first +quit
+        LINES "WARNING: .*portal end|: open, paired with"
+        EXPECT_LINES
+            "\"orange\" at .*: open, paired with \"blue\""
+            "\"blue\" at .*: open, paired with \"orange\"")
+    list(APPEND MAP_TESTS server_finds_test_first_portal_open)
 endif()
 
 if(BUILD_CLIENT)
