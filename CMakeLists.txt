@@ -103,6 +103,7 @@ include(client)
 include(basegame)
 include(missionpack)
 include(q3map2)
+include(maps)
 include(pk3)
 include(openarena)
 

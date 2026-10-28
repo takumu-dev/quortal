@@ -41,3 +41,12 @@ profile
 *.opensdf
 *.suo
 /.vs
+
+# Compiled test maps
+####################
+/data/maps/*.aas
+/data/maps/*.bak
+/data/maps/*.bsp
+/data/maps/*.lin
+/data/maps/*.prt
+/data/maps/*.srf
