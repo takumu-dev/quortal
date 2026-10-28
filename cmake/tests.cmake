@@ -50,7 +50,8 @@ if(BUILD_SERVER)
     # about nothing else
     set(TEST_SEALED_WARNINGS
         "unpaired doesn't pair"
-        "own_partner targets itself")
+        "own_partner targets itself"
+        "size_mismatch isn't the size of its partner")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")

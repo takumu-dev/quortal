@@ -275,6 +275,23 @@ static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
 		}
 	}
 
+	// a portal whose ends differ in size breaks the rule once, at the end
+	// whose name sorts first
+	for ( i = 0 ; i < numEnds ; i++ ) {
+		end = &ends[i];
+		if ( end->partner == -1 ) {
+			continue;
+		}
+
+		partner = &ends[end->partner];
+		if ( Q_stricmp( end->targetname, partner->targetname ) > 0 ) {
+			continue;
+		}
+		if ( end->width != partner->width || end->height != partner->height ) {
+			end->rule = PR_SIZE_MISMATCH;
+		}
+	}
+
 	for ( i = 0 ; i < numEnds ; i++ ) {
 		end = &ends[i];
 		if ( end->rule != PR_NONE ) {
@@ -316,6 +333,8 @@ static const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return va( "doesn't pair, as \"%s\" doesn't target it", end->target );
 	case PR_OWN_PARTNER:
 		return "targets itself";
+	case PR_SIZE_MISMATCH:
+		return va( "isn't the size of its partner \"%s\"", end->target );
 	default:
 		return NULL;
 	}

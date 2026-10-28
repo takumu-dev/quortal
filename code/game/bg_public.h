@@ -748,7 +748,10 @@ typedef enum {
 	PR_NOT_MUTUAL,
 
 	// and no end is its own partner
-	PR_OWN_PARTNER
+	PR_OWN_PARTNER,
+
+	// both ends of a portal are the same size
+	PR_SIZE_MISMATCH
 } portalRule_t;
 
 typedef struct {
