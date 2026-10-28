@@ -102,6 +102,7 @@ include(renderer_gl2)
 include(client)
 include(basegame)
 include(missionpack)
+include(q3map2)
 include(pk3)
 include(openarena)
 
