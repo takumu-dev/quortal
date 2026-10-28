@@ -1,14 +1,29 @@
 # quortal's checks, run with ctest. Each is labelled by what it needs:
 #
+#   - docs: git, and the source's history;
 #   - server: the dedicated server and the test maps;
 #   - render: the client, the test maps, and OpenGL with 8 stencil bits.
 #
 # Without q3map2 there are no test maps, so the checks that need them are
-# disabled, and ctest runs the rest
+# disabled, and ctest runs the rest. So is the docs check without the
+# source's history, as in a source archive
 
 include(utils/add_game_test)
 
 enable_testing()
+
+# The docs' links, identifiers and excerpts are checked against the source,
+# and the chapters' lists of commits against its history
+add_test(NAME docs_hold_true
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_SOURCE_DIR}/cmake/utils/check_docs.cmake)
+set_tests_properties(docs_hold_true PROPERTIES LABELS docs)
+
+find_package(Git QUIET)
+if(NOT GIT_FOUND OR NOT EXISTS ${CMAKE_SOURCE_DIR}/.git)
+    set_tests_properties(docs_hold_true PROPERTIES DISABLED TRUE)
+endif()
 
 # On Windows, a check's client can load other OpenGL DLLs than the system's,
 # such as Mesa's, which render in software on a machine with no GPU and
