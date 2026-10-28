@@ -16,7 +16,7 @@ Build quortal and fetch OpenArena's data, as [Building and running](how-to/build
 build/Release/quortal.x86_64 +devmap test_first
 ```
 
-`test_first` is two rooms, textured and lit alike, so that a portal between them can show no seam. Its source is [test_first.map](../data/maps/test_first.map).
+`test_first` is two rooms, textured and lit alike, so that a portal between them can show no seam. Its source is [test_first.map](../data/maps/test_first.map), and [chapter 1](01-quortal-on-ioquake3.md) starts there.
 
 ## The chapters
 
@@ -24,7 +24,9 @@ There's one chapter for each step, in the order the history builds them. Each op
 
 Each identifier a chapter names links to the file it's in, and each excerpt is quoted whole from the file linked just above it. The docs check, which CI and `ctest` run, keeps both true as the code changes, and keeps each chapter's commits in the history.
 
-No chapter is finished yet. Each comes as the last commit of its step.
+1. [quortal on ioquake3](01-quortal-on-ioquake3.md): ioquake3 made into a standalone game, quortal, that runs on OpenArena's free data, with its own game code in `quortal.pk3`, and GL1 as its only renderer, keeping the 8 stencil bits that portal views need.
+
+The rest each come as the last commit of their step.
 
 ## The how-tos
 
@@ -57,12 +59,12 @@ git diff --stat --diff-filter=A 87a99d1 HEAD   # the files quortal added
 git diff 87a99d1 HEAD -- code/qcommon/vm.c     # what quortal changed in one of ioquake3's
 ```
 
-In this folder, this index, the glossary, the chapters and the how-tos are quortal's. The rest are ioquake3's: its own [readme](ioquake3-readme.md), id's [readme](id-readme.txt) for the Quake III Arena source, and its readmes on the [GL2 renderer](opengl2-readme.md), which quortal doesn't build, on [VoIP](voip-readme.txt), on [MD4 models](md4-readme.txt) and on [signing for macOS](macos-codesign-notarization.txt).
+In this folder, this index, the glossary, the chapters, the how-tos and the [screenshots](screenshots) are quortal's. The rest are ioquake3's: its own [readme](ioquake3-readme.md), id's [readme](id-readme.txt) for the Quake III Arena source, and its readmes on the [GL2 renderer](opengl2-readme.md), which quortal doesn't build, on [VoIP](voip-readme.txt), on [MD4 models](md4-readme.txt) and on [signing for macOS](macos-codesign-notarization.txt).
 
 ## Licence
 
 quortal's own prose and diagrams are under the Creative Commons Attribution 4.0 International licence, [CC BY 4.0](../CC-BY-4.0.txt), so that you can reuse them, in a course, a book or a slide, as long as you credit quortal. They're the `README.md` at the top of the source, this index, the glossary, the chapters, the how-tos, and their figures.
 
-Everything else is under the GNU General Public License, version 2 or (at your option) any later version, whose text is in [COPYING.txt](../COPYING.txt). That's the code, including any code the docs quote, quortal's game data, which [CREDITS.txt](../data/CREDITS.txt) credits, the screenshots, which show OpenArena's art, and ioquake3's readmes. The libraries in `code/thirdparty`, and the lcc compiler in `code/tools/lcc`, keep their own licences.
+Everything else is under the GNU General Public License, version 2 or (at your option) any later version, whose text is in [COPYING.txt](../COPYING.txt). That's the code, including any code the docs quote, quortal's game data, which [CREDITS.txt](../data/CREDITS.txt) credits, the screenshots, which show the game's data, and ioquake3's readmes. The libraries in `code/thirdparty`, and the lcc compiler in `code/tools/lcc`, keep their own licences.
 
 A change to a file takes that file's licence.

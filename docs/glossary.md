@@ -1,6 +1,6 @@
 # Glossary
 
-The words the docs use for portals, and for how they're taught. ioquake3 already has three things it calls portals, and none of them is a portal in the docs' sense, so they're listed at the end, each marked as not a portal.
+The words the docs use for portals, for how they're taught, and for the parts of ioquake3 that the chapters build on. ioquake3 already has three things it calls portals, and none of them is a portal in the docs' sense, so they're listed at the end, each marked as not a portal.
 
 ## Portals
 
@@ -57,6 +57,28 @@ One labelled spot in a test map, which shows one case.
 ### Walk
 
 A scripted run of the player through one station's case, which says what must come of it: which crossings happen, and how the player's speed and view come out of them.
+
+## ioquake3's words
+
+### Game code
+
+The part of the game that isn't the engine, in three modules: qagame, the game as the server runs it, cgame, the client's side of it, which predicts the player's movement and decides what to draw, and ui, the menus. Each is built both as a QVM and as a native library.
+
+### QVM
+
+The game code compiled to bytecode for the engine's virtual machine, which the engine compiles to the machine's own code as it loads it, or interprets on a machine it has no compiler for. A QVM can reach nothing outside its own memory but through the engine's calls, and is the same file on every platform. [`VM_Create`](../code/qcommon/vm.c) loads one.
+
+### pk3
+
+A zip file of game data, such as maps, textures, shaders and QVMs, in a game folder. A file is looked for first in the pk3 whose name sorts last, so a pk3 overrides those whose names sort before it.
+
+### Pure server
+
+A server that gives its clients the list of the pk3s it has loaded, so that they load only from those, and everyone plays the same data and game code. [`sv_pure`](../code/server/sv_init.c) is 1 by default, in single player too.
+
+### Stencil buffer
+
+A few bits that an OpenGL window keeps for each pixel, beside its colour and depth, which drawing can set and test, so that later drawing lands only where earlier drawing marked. quortal's portal views use all 8 of its bits.
 
 ## ioquake3's own portals, which aren't portals
 
