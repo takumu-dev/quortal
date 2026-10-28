@@ -43,6 +43,29 @@ if(BUILD_SERVER)
         ARGS +map test_first +quit
         EXPECT "gamename: ${BASEGAME}")
     list(APPEND MAP_TESTS server_runs_quortal_game_code)
+
+    # test_sealed has a booth for each rule a portal can break, and one good
+    # portal. In each booth the end that breaks the rule is named after it,
+    # and the server warns about that end once, naming the rule. It warns
+    # about nothing else
+    set(TEST_SEALED_WARNINGS
+        "unpaired doesn't pair")
+
+    # A warning names the end, then its position, then the rule
+    set(TEST_SEALED_WARNING_LINES "")
+    foreach(WARNING IN LISTS TEST_SEALED_WARNINGS)
+        string(REGEX REPLACE "^([^ ]+) (.*)$" "\"\\1\" at .* \\2" LINE "${WARNING}")
+        list(APPEND TEST_SEALED_WARNING_LINES "${LINE}")
+    endforeach()
+
+    add_game_test(server_warns_once_per_test_sealed_booth
+        GAME ${SERVER_BINARY}
+        LABEL server
+        TIMEOUT 60
+        ARGS +map test_sealed +quit
+        LINES "WARNING: .*portal end"
+        EXPECT_LINES ${TEST_SEALED_WARNING_LINES})
+    list(APPEND MAP_TESTS server_warns_once_per_test_sealed_booth)
 endif()
 
 if(BUILD_CLIENT)

@@ -190,6 +190,7 @@ spawn_t	spawns[] = {
 	{"info_null", SP_info_null},
 	{"info_notnull", SP_info_notnull},		// use target_position instead
 	{"info_camp", SP_info_camp},
+	{"info_portal_end", SP_info_null},		// read by G_ReadPortalEnds
 
 	{"func_plat", SP_func_plat},
 	{"func_button", SP_func_button},

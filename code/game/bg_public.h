@@ -712,6 +712,62 @@ void	BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 qboolean	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
 
+/*
+===================================================================================
+
+PORTAL ENDS
+
+Both games read the map's portal ends from its entity string, and check them,
+with the same code, so they reach the same verdicts. A portal that breaks a
+rule is sealed: its ends show as painted walls, with nothing seen or passed
+through them. The map still loads.
+
+===================================================================================
+*/
+
+#define	MAX_PORTAL_ENDS			128
+
+// a portal end's visibility point is this far in front of its partner's centre
+#define	PORTAL_VIS_DISTANCE		8
+
+typedef enum {
+	PE_OPEN,				// seen and passed through
+	PE_SEALED				// a painted wall: no view, no visibility point and no crossing
+} portalEndState_t;
+
+// the rules a portal end can break
+typedef enum {
+	PR_NONE,
+
+	// the ends of a portal target each other, by names no other end has
+	PR_NO_TARGETNAME,
+	PR_SHARED_TARGETNAME,
+	PR_NO_TARGET,
+	PR_NO_SUCH_TARGET,
+	PR_SHARED_TARGET,
+	PR_NOT_MUTUAL
+} portalRule_t;
+
+typedef struct {
+	char				targetname[MAX_QPATH];
+	char				target[MAX_QPATH];
+	char				shader[MAX_QPATH];		// shown past the nesting limit, black if empty
+
+	vec3_t				origin;					// the opening's centre, on the surface
+	vec3_t				axis[3];				// facing out of the surface, then along its width, then up its height
+	float				width;
+	float				height;
+
+	int					partner;				// the end it pairs with, or -1
+	portalEndState_t	state;
+	portalRule_t		rule;					// the rule it broke itself, if any
+	vec3_t				visOrigin;				// where its view is seen from, if it's open
+} portalEnd_t;
+
+int			BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
+				void (*warn)( const char *warning ), portalEnd_t *ends, int maxEnds );
+
+
 #define ARENAS_PER_TIER		4
 #define MAX_ARENAS			1024
 #define	MAX_ARENAS_TEXT		8192

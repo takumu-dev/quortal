@@ -407,6 +407,9 @@ typedef struct {
 #ifdef MISSIONPACK
 	int			portalSequence;
 #endif
+
+	int			numPortalEnds;
+	portalEnd_t	portalEnds[MAX_PORTAL_ENDS];
 } level_locals_t;
 
 
@@ -420,6 +423,11 @@ qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out );
 qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out );
 void		G_SpawnEntitiesFromString( void );
 char *G_NewString( const char *string );
+
+//
+// g_portal.c
+//
+void G_ReadPortalEnds( void );
 
 //
 // g_cmds.c
