@@ -5,6 +5,12 @@ endif()
 include(utils/qvm_tools)
 include(utils/set_output_dirs)
 
+# The game modules don't share the engine's definitions, but they need
+# STANDALONE too, for q_shared.h to give them the same identity
+if(BUILD_STANDALONE)
+    list(APPEND GAME_MODULE_DEFINITIONS STANDALONE)
+endif()
+
 set(CGAME_SOURCES
     ${SOURCE_DIR}/cgame/cg_main.c
     ${SOURCE_DIR}/game/bg_misc.c
@@ -137,19 +143,19 @@ if(BUILD_GAME_LIBRARIES)
     set(UI_MODULE_BINARY_BASEGAME ${UI_MODULE_BINARY}_${BASEGAME})
 
     add_library(                ${CGAME_MODULE_BINARY_BASEGAME} SHARED ${CGAME_SOURCES_BASEGAME} ${CGAME_BINARY_SOURCES})
-    target_compile_definitions( ${CGAME_MODULE_BINARY_BASEGAME} PRIVATE CGAME)
+    target_compile_definitions( ${CGAME_MODULE_BINARY_BASEGAME} PRIVATE CGAME ${GAME_MODULE_DEFINITIONS})
     target_link_libraries(      ${CGAME_MODULE_BINARY_BASEGAME} PRIVATE ${COMMON_LIBRARIES})
     set_target_properties(      ${CGAME_MODULE_BINARY_BASEGAME} PROPERTIES OUTPUT_NAME ${CGAME_MODULE_BINARY})
     set_output_dirs(            ${CGAME_MODULE_BINARY_BASEGAME} SUBDIRECTORY ${BASEGAME})
 
     add_library(                ${GAME_MODULE_BINARY_BASEGAME} SHARED ${GAME_SOURCES_BASEGAME} ${GAME_BINARY_SOURCES})
-    target_compile_definitions( ${GAME_MODULE_BINARY_BASEGAME} PRIVATE QAGAME)
+    target_compile_definitions( ${GAME_MODULE_BINARY_BASEGAME} PRIVATE QAGAME ${GAME_MODULE_DEFINITIONS})
     target_link_libraries(      ${GAME_MODULE_BINARY_BASEGAME} PRIVATE ${COMMON_LIBRARIES})
     set_target_properties(      ${GAME_MODULE_BINARY_BASEGAME} PROPERTIES OUTPUT_NAME ${GAME_MODULE_BINARY})
     set_output_dirs(            ${GAME_MODULE_BINARY_BASEGAME} SUBDIRECTORY ${BASEGAME})
 
     add_library(                ${UI_MODULE_BINARY_BASEGAME} SHARED ${UI_SOURCES_BASEGAME} ${UI_BINARY_SOURCES})
-    target_compile_definitions( ${UI_MODULE_BINARY_BASEGAME} PRIVATE UI)
+    target_compile_definitions( ${UI_MODULE_BINARY_BASEGAME} PRIVATE UI ${GAME_MODULE_DEFINITIONS})
     target_link_libraries(      ${UI_MODULE_BINARY_BASEGAME} PRIVATE ${COMMON_LIBRARIES})
     set_target_properties(      ${UI_MODULE_BINARY_BASEGAME} PROPERTIES OUTPUT_NAME ${UI_MODULE_BINARY})
     set_output_dirs(            ${UI_MODULE_BINARY_BASEGAME} SUBDIRECTORY ${BASEGAME})
@@ -160,21 +166,26 @@ if(BUILD_GAME_QVMS)
     set(GAME_MODULE_QVM_BASEGAME ${GAME_MODULE}qvm_${BASEGAME})
     set(UI_MODULE_QVM_BASEGAME ${UI_MODULE}qvm_${BASEGAME})
 
+    # The QVMs go into quortal.pk3 only, never loose into the game folder, so
+    # each one is loaded from the same file whether the server is pure or not
     add_qvm(${CGAME_MODULE_QVM_BASEGAME}
-        DEFINITIONS CGAME
+        DEFINITIONS CGAME ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${CGAME_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${CGAME_SOURCES_BASEGAME} ${CGAME_QVM_SOURCES})
 
     add_qvm(${GAME_MODULE_QVM_BASEGAME}
-        DEFINITIONS QAGAME
+        DEFINITIONS QAGAME ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${GAME_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${GAME_SOURCES_BASEGAME} ${GAME_QVM_SOURCES})
 
     add_qvm(${UI_MODULE_QVM_BASEGAME}
-        DEFINITIONS UI
+        DEFINITIONS UI ${GAME_MODULE_DEFINITIONS}
         OUTPUT_NAME ${UI_MODULE}
-        OUTPUT_DIRECTORY ${BASEGAME}/vm
+        OUTPUT_DIRECTORY vm
+        PK3 ${BASEGAME}
         SOURCES ${UI_SOURCES_BASEGAME} ${UI_QVM_SOURCES})
 endif()

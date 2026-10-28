@@ -1,0 +1,231 @@
+# Checks quortal's docs, and builds quortal on Linux, Windows and macOS. On
+# Linux and Windows it also fetches OpenArena's data and q3map2, builds the
+# test maps and runs every check with ctest. Neither has a GPU, so the
+# client renders in software, with Mesa's llvmpipe: on Linux from Ubuntu's
+# packages, under xvfb-run, and on Windows from mesa-dist-win, which the
+# checks load beside the client. macOS builds no maps, so it's built and
+# nothing more.
+#
+# Windows and macOS cost far more of the credits than Linux, so all four
+# jobs run only for develop and for tags. A push to any other branch runs
+# the docs and Linux at once, while Windows and macOS each wait for someone
+# to approve approve-windows or approve-macos, in the web app or with
+# circleci run approve. A push to main runs nothing: each comes with its
+# release's tag, whose pipeline is of the same commit.
+#
+# Only the downloads are cached, each under a key that names the SHA-256 its
+# fetch script pins, so pinning a new download means changing its keys here
+# too. They're kept for 15 days, CircleCI's longest. The build itself always
+# starts afresh.
+version: 2.1
+
+commands:
+  # A check that's disabled or skipped doesn't fail ctest, but here every one
+  # must run. The render checks prove that the client gets a stencil, and
+  # the logs must also show that it rendered with llvmpipe, rather than with
+  # another OpenGL that happens to give one
+  check:
+    parameters:
+      config:
+        type: string
+    steps:
+      - run:
+          name: Check
+          command: |
+            ctest --test-dir build --build-config << parameters.config >> \
+              --output-on-failure --no-tests=error | tee ctest.log
+            if grep -q "tests did not run" ctest.log; then
+              echo "Every check must run"
+              exit 1
+            fi
+            grep -h "^GL_RENDERER: llvmpipe" \
+              build/tests.dir/<< parameters.config >>/*/home/quortal/qconsole.log
+
+jobs:
+  # The docs check needs only CMake, which the image has, and git's history,
+  # which the checkout holds: it's blobless, so it has every commit, though
+  # not the files of any but the one checked out
+  docs:
+    docker:
+      - image: cimg/base:2026.10-24.04
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Check the docs
+          command: cmake -P cmake/utils/check_docs.cmake
+
+  linux:
+    docker:
+      - image: cimg/base:2026.10-24.04
+    resource_class: large
+    retention:
+      caches: 15d
+    environment:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      LP_NATIVE_VECTOR_WIDTH: "256"
+    steps:
+      - checkout
+      - run:
+          name: Install CMake, SDL, Xvfb and Mesa
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends \
+              cmake libsdl2-dev xvfb xauth libgl1-mesa-dri libglx-mesa0
+      - restore_cache:
+          name: Restore OpenArena's zip
+          keys:
+            - openarena-{{ arch }}-5a8faf7f5b51f351b0a1618c06b6b98a5f1a6758f1d39818de2c87df2a0bac4a
+      - restore_cache:
+          name: Restore NetRadiant-custom's archive
+          keys:
+            - netradiant-custom-{{ arch }}-f48f6f1d0db2b910ef9cb5dc5d8a722852510f3c5c278dc17615c0466b8a7a3d
+      - run:
+          name: Configure
+          command: cmake -S . -B build
+      - run:
+          name: Fetch OpenArena's data and q3map2
+          command: cmake --build build --target openarena q3map2
+      - save_cache:
+          name: Save OpenArena's zip
+          key: openarena-{{ arch }}-5a8faf7f5b51f351b0a1618c06b6b98a5f1a6758f1d39818de2c87df2a0bac4a
+          paths:
+            - ~/.cache/quortal/openarena-0.8.8.zip
+      - save_cache:
+          name: Save NetRadiant-custom's archive
+          key: netradiant-custom-{{ arch }}-f48f6f1d0db2b910ef9cb5dc5d8a722852510f3c5c278dc17615c0466b8a7a3d
+          paths:
+            - ~/.cache/quortal/netradiant-custom-20260114-linux-x86_64.7z
+      # Now that q3map2 is there, the build configures again, and builds
+      # the maps
+      - run:
+          name: Build
+          command: cmake --build build --parallel 4
+      - check:
+          config: Release
+
+  windows:
+    machine:
+      image: windows-server-2022-gui:2026.05.1
+      shell: bash.exe -eo pipefail
+    resource_class: windows.medium
+    retention:
+      caches: 15d
+    environment:
+      GALLIUM_DRIVER: llvmpipe
+      LP_NATIVE_VECTOR_WIDTH: "256"
+    steps:
+      - checkout
+      # PATH changes reach later steps only through $BASH_ENV, which
+      # bash.exe sources
+      - run:
+          name: Install CMake
+          command: |
+            if ! command -v cmake; then
+              choco install -y --no-progress cmake --version 4.4.4
+              echo "export PATH=\"$(cygpath -u 'C:\Program Files\CMake\bin'):\$PATH\"" >> "$BASH_ENV"
+            fi
+      - restore_cache:
+          name: Restore OpenArena's zip
+          keys:
+            - openarena-{{ arch }}-5a8faf7f5b51f351b0a1618c06b6b98a5f1a6758f1d39818de2c87df2a0bac4a
+      - restore_cache:
+          name: Restore NetRadiant-custom's archive
+          keys:
+            - netradiant-custom-{{ arch }}-25c2e14e2b0bd7a9897b2f943c8821458873c8713973f9c3d68d49f26fe79e35
+      - restore_cache:
+          name: Restore mesa-dist-win's archive
+          keys:
+            - mesa-dist-win-{{ arch }}-351fc8c8b695878ffb3eaa044b3ead08672a48b1a045e3c3e3975811df0f6695
+      - run:
+          name: Configure
+          command: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DTEST_OPENGL_DIR=build/mesa
+      - run:
+          name: Fetch OpenArena's data, q3map2 and Mesa
+          command: |
+            cmake --build build --config Release --target openarena q3map2
+            cmake -DMESA_DIR=build/mesa -P cmake/utils/fetch_mesa.cmake
+      - save_cache:
+          name: Save OpenArena's zip
+          key: openarena-{{ arch }}-5a8faf7f5b51f351b0a1618c06b6b98a5f1a6758f1d39818de2c87df2a0bac4a
+          paths:
+            - ~/AppData/Local/quortal/openarena-0.8.8.zip
+      - save_cache:
+          name: Save NetRadiant-custom's archive
+          key: netradiant-custom-{{ arch }}-25c2e14e2b0bd7a9897b2f943c8821458873c8713973f9c3d68d49f26fe79e35
+          paths:
+            - ~/AppData/Local/quortal/netradiant-custom-20260114-windows-x86_64.zip
+      - save_cache:
+          name: Save mesa-dist-win's archive
+          key: mesa-dist-win-{{ arch }}-351fc8c8b695878ffb3eaa044b3ead08672a48b1a045e3c3e3975811df0f6695
+          paths:
+            - ~/AppData/Local/quortal/mesa3d-26.2.4-release-msvc.7z
+      - run:
+          name: Build
+          command: cmake --build build --config Release --parallel 4
+      - check:
+          config: Release
+
+  macos:
+    macos:
+      xcode: 27.1.0
+    resource_class: m4pro.medium
+    steps:
+      - checkout
+      - run:
+          name: Install CMake
+          command: |
+            if ! command -v cmake; then
+              release=cmake-4.4.4-macos-universal
+              curl -sSfLO "https://github.com/Kitware/CMake/releases/download/v4.4.4/$release.tar.gz"
+              echo "4b7b73704b1db9b374e5c9ab8e17ac6148b817b6396ee75cd94a852cbac9d305  $release.tar.gz" \
+                | shasum -a 256 -c -
+              tar -xzf "$release.tar.gz" -C ~
+              rm "$release.tar.gz"
+              echo "export PATH=\"\$HOME/$release/CMake.app/Contents/bin:\$PATH\"" >> "$BASH_ENV"
+            fi
+      - run:
+          name: Configure
+          command: cmake -S . -B build
+      - run:
+          name: Build
+          command: cmake --build build --parallel 4
+
+workflows:
+  every-platform:
+    when:
+      or:
+        - equal: [develop, << pipeline.git.branch >>]
+        - << pipeline.git.tag >>
+    jobs:
+      # A job runs for a tag only when its filters name tags
+      - docs:
+          filters: &tags
+            tags:
+              only: /.*/
+      - linux:
+          filters: *tags
+      - windows:
+          filters: *tags
+      - macos:
+          filters: *tags
+
+  linux-first:
+    unless:
+      or:
+        - equal: [develop, << pipeline.git.branch >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - << pipeline.git.tag >>
+    jobs:
+      - docs
+      - linux
+      - approve-windows:
+          type: approval
+      - windows:
+          requires:
+            - approve-windows
+      - approve-macos:
+          type: approval
+      - macos:
+          requires:
+            - approve-macos

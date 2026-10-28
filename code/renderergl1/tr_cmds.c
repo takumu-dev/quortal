@@ -299,6 +299,16 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 	tr.frameSceneNum = 0;
 
 	//
+	// portal views own the stencil buffer, so stencil shadows
+	// fall back to blob shadows
+	//
+	if ( r_shadows->integer == 2 )
+	{
+		ri.Printf( PRINT_ALL, "Warning: portal views own the stencil buffer, using blob shadows instead\n" );
+		ri.Cvar_Set( "cg_shadows", "1" );
+	}
+
+	//
 	// do overdraw measurement
 	//
 	if ( r_measureOverdraw->integer )

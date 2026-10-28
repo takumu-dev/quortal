@@ -1,0 +1,30 @@
+quortal's game data
+===================
+
+quortal's own data lives in the data folder of its source. The build zips
+it into quortal.pk3, leaving out the .map sources, along with quortal's
+game code, which keeps the licence of the code it's built from.
+
+OpenArena
+---------
+
+Everything else quortal shows and plays is OpenArena 0.8.8's data, by the
+OpenArena Team, under the GNU General Public License, version 2 or (at your
+option) any later version (GPL-2.0-or-later). quortal's build fetches its
+paks. They're never part of quortal's source.
+
+  https://openarena.ws/
+
+quortal's own data
+------------------
+
+Apart from the third-party files listed below, the files in quortal's data
+folder are quortal's own work, under the GNU General Public License,
+version 2 or (at your option) any later version (GPL-2.0-or-later). The
+text of version 2 is in COPYING.txt, at the root of quortal's source.
+
+Third-party files
+-----------------
+
+Any file in the data folder that isn't quortal's own is listed here, with
+its author, licence and where it came from. There are none yet.
