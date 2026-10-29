@@ -35,6 +35,17 @@ static void CG_PortalEndWarning( const char *warning ) {
 
 /*
 ================
+CG_PortalEndContents
+
+Returns the contents of the world alone at a point
+================
+*/
+static int CG_PortalEndContents( const vec3_t point ) {
+	return trap_CM_PointContents( point, 0 );
+}
+
+/*
+================
 CG_ReadPortalEnds
 
 Reads the map's portal ends and checks them, with the server's own code, so
@@ -47,6 +58,6 @@ void CG_ReadPortalEnds( void ) {
 
 	trap_Cvar_VariableStringBuffer( "developer", var, sizeof( var ) );
 
-	cgs.numPortalEnds = BG_LoadPortalEnds( trap_GetEntityToken, atoi( var ) ? CG_PortalEndWarning : NULL,
-		cgs.portalEnds, MAX_PORTAL_ENDS );
+	cgs.numPortalEnds = BG_LoadPortalEnds( trap_GetEntityToken, CG_PortalEndContents,
+		atoi( var ) ? CG_PortalEndWarning : NULL, cgs.portalEnds, MAX_PORTAL_ENDS );
 }

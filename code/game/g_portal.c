@@ -35,15 +35,27 @@ static void G_PortalEndWarning( const char *warning ) {
 
 /*
 ================
+G_PortalEndContents
+
+Returns the contents at a point, which are the world's alone while nothing
+is spawned
+================
+*/
+static int G_PortalEndContents( const vec3_t point ) {
+	return trap_PointContents( point, ENTITYNUM_NONE );
+}
+
+/*
+================
 G_ReadPortalEnds
 
 Reads the map's portal ends and checks them, warning about every rule they
 break. It reads the whole entity string, before the entities are spawned
-from it
+from it, so that the ends are checked against the world alone
 ================
 */
 void G_ReadPortalEnds( void ) {
-	level.numPortalEnds = BG_LoadPortalEnds( trap_GetEntityToken, G_PortalEndWarning,
+	level.numPortalEnds = BG_LoadPortalEnds( trap_GetEntityToken, G_PortalEndContents, G_PortalEndWarning,
 		level.portalEnds, MAX_PORTAL_ENDS );
 }
 

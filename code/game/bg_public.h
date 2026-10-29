@@ -730,6 +730,9 @@ through them. The map still loads.
 // a portal end's visibility point is this far in front of its partner's centre
 #define	PORTAL_VIS_DISTANCE		8
 
+// a portal end's plug fills its opening this deep
+#define	PORTAL_PLUG_DEPTH		64
+
 typedef enum {
 	PE_OPEN,				// seen and passed through
 	PE_SEALED,				// a painted wall: no view, no visibility point and no crossing
@@ -758,7 +761,10 @@ typedef enum {
 	PR_OWN_PARTNER,
 
 	// both ends of a portal are the same size
-	PR_SIZE_MISMATCH
+	PR_SIZE_MISMATCH,
+
+	// the plug fills the opening
+	PR_UNFILLED
 } portalRule_t;
 
 typedef struct {
@@ -778,7 +784,8 @@ typedef struct {
 } portalEnd_t;
 
 int			BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
-				void (*warn)( const char *warning ), portalEnd_t *ends, int maxEnds );
+				int (*pointContents)( const vec3_t point ), void (*warn)( const char *warning ),
+				portalEnd_t *ends, int maxEnds );
 const char	*BG_PortalEndRule( const portalEnd_t *end );
 
 

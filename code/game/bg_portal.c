@@ -261,17 +261,152 @@ static int BG_PairPortalEnd( const portalEnd_t *ends, int numEnds, int endNum, p
 	return partner;
 }
 
+// the world around a portal end is checked to within this distance of where
+// its keys place it
+#define	PORTAL_TOLERANCE		1
+
+// and sampled at each edge, and this far apart between them
+#define	PORTAL_SAMPLE_SPACING	16
+
+/*
+================
+BG_PortalSampleCount
+
+Returns how many points a span reaching half either side of its centre is
+sampled at: both its ends, its centre, and every PORTAL_SAMPLE_SPACING units
+out from its centre
+================
+*/
+static int BG_PortalSampleCount( float half ) {
+	int		steps;
+
+	if ( half <= 0 ) {
+		return 1;
+	}
+
+	// the steps out from the centre, the last of them to the span's end
+	steps = (int)( half / PORTAL_SAMPLE_SPACING );
+	if ( steps * PORTAL_SAMPLE_SPACING < half ) {
+		steps++;
+	}
+
+	return 2 * steps + 1;
+}
+
+/*
+================
+BG_PortalSample
+
+Returns the i'th of the count points a span reaching half either side of its
+centre is sampled at, from one end to the other, as an offset from its centre
+================
+*/
+static float BG_PortalSample( float half, int i, int count ) {
+	if ( count == 1 ) {
+		return 0;
+	}
+	if ( i == 0 ) {
+		return -half;
+	}
+	if ( i == count - 1 ) {
+		return half;
+	}
+	return ( i - count / 2 ) * PORTAL_SAMPLE_SPACING;
+}
+
+/*
+================
+BG_PortalEndLayerHolds
+
+Samples the world across a rectangle parallel to end's opening, reaching
+halfWidth and halfHeight either side of its centre, and depth behind its
+surface, or in front of it when depth is negative. With edgesOnly, only the
+rectangle's edges are sampled. Returns qtrue if the contents of every sample
+hold all of need and none of forbid
+================
+*/
+static qboolean BG_PortalEndLayerHolds( const portalEnd_t *end, int (*pointContents)( const vec3_t point ),
+		float halfWidth, float halfHeight, float depth, qboolean edgesOnly, int need, int forbid ) {
+	vec3_t	point;
+	int		numAcross, numUp;
+	int		contents;
+	int		i, j;
+
+	numAcross = BG_PortalSampleCount( halfWidth );
+	numUp = BG_PortalSampleCount( halfHeight );
+
+	for ( i = 0 ; i < numAcross ; i++ ) {
+		for ( j = 0 ; j < numUp ; j++ ) {
+			if ( edgesOnly && i > 0 && i < numAcross - 1 && j > 0 && j < numUp - 1 ) {
+				continue;
+			}
+
+			VectorMA( end->origin, BG_PortalSample( halfWidth, i, numAcross ), end->axis[1], point );
+			VectorMA( point, BG_PortalSample( halfHeight, j, numUp ), end->axis[2], point );
+			VectorMA( point, -depth, end->axis[0], point );
+
+			contents = pointContents( point );
+			if ( ( contents & need ) != need || ( contents & forbid ) ) {
+				return qfalse;
+			}
+		}
+	}
+
+	return qtrue;
+}
+
+/*
+================
+BG_CheckPortalEndWorld
+
+Returns the first rule the world around end breaks, or PR_NONE. The world is
+sampled at the opening's corners, along its edges, and across it every
+PORTAL_SAMPLE_SPACING units out from its centre
+================
+*/
+static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointContents)( const vec3_t point ) ) {
+	float	halfWidth, halfHeight, halfDepth;
+	int		numDeep;
+	int		i;
+
+	// the samples in the opening fall short of its edges by the tolerance
+	halfWidth = end->width / 2 - PORTAL_TOLERANCE;
+	halfHeight = end->height / 2 - PORTAL_TOLERANCE;
+
+	// the plug fills the opening, PORTAL_PLUG_DEPTH units deep, sampled at
+	// its front and back as well as between. It isn't solid, and nothing
+	// solid fills the opening with it. It's flush with the surface, so none
+	// of it stands in front
+	if ( !BG_PortalEndLayerHolds( end, pointContents, halfWidth, halfHeight,
+			-PORTAL_TOLERANCE, qfalse, 0, CONTENTS_PLUG ) ) {
+		return PR_UNFILLED;
+	}
+
+	halfDepth = PORTAL_PLUG_DEPTH / 2 - PORTAL_TOLERANCE;
+	numDeep = BG_PortalSampleCount( halfDepth );
+	for ( i = 0 ; i < numDeep ; i++ ) {
+		if ( !BG_PortalEndLayerHolds( end, pointContents, halfWidth, halfHeight,
+				PORTAL_PLUG_DEPTH / 2 + BG_PortalSample( halfDepth, i, numDeep ), qfalse,
+				CONTENTS_PLUG, CONTENTS_SOLID ) ) {
+			return PR_UNFILLED;
+		}
+	}
+
+	return PR_NONE;
+}
+
 /*
 ================
 BG_CheckPortalEnds
 
 Pairs the ends and checks them, giving each its state, and the rule it broke
-if it broke one. A portal is open only when both its ends broke none: an end
-that broke one seals its partner, and an end that was skipped as it was read
-still pairs, to seal its partner
+if it broke one. An end is checked against the world around it only once it
+has broken no other rule. A portal is open only when both its ends broke
+none: an end that broke one seals its partner, and an end that was skipped
+as it was read still pairs, to seal its partner
 ================
 */
-static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
+static void BG_CheckPortalEnds( int (*pointContents)( const vec3_t point ), portalEnd_t *ends, int numEnds ) {
 	portalEnd_t		*end;
 	portalEnd_t		*partner;
 	portalRule_t	rule;
@@ -302,6 +437,13 @@ static void BG_CheckPortalEnds( portalEnd_t *ends, int numEnds ) {
 		}
 		if ( end->width != partner->width || end->height != partner->height ) {
 			end->rule = PR_SIZE_MISMATCH;
+		}
+	}
+
+	for ( i = 0 ; i < numEnds ; i++ ) {
+		end = &ends[i];
+		if ( end->rule == PR_NONE ) {
+			end->rule = BG_CheckPortalEndWorld( end, pointContents );
 		}
 	}
 
@@ -359,6 +501,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return "targets itself";
 	case PR_SIZE_MISMATCH:
 		return va( "isn't the size of its partner \"%s\"", end->target );
+	case PR_UNFILLED:
+		return va( "isn't filled by a plug %i units deep, flush with its surface", PORTAL_PLUG_DEPTH );
 	default:
 		return NULL;
 	}
@@ -395,12 +539,14 @@ Reads the map's portal ends into ends, and checks them, giving each its
 verdict. Returns how many were read.
 
 getToken returns the map's entity string token by token, as
-trap_GetEntityToken does. warn, unless it's NULL, is given a warning for each
-rule an end breaks
+trap_GetEntityToken does. pointContents returns the contents of the world
+alone at a point, with no entity in it. warn, unless it's NULL, is given a
+warning for each rule an end breaks
 ================
 */
 int BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
-		void (*warn)( const char *warning ), portalEnd_t *ends, int maxEnds ) {
+		int (*pointContents)( const vec3_t point ), void (*warn)( const char *warning ),
+		portalEnd_t *ends, int maxEnds ) {
 	const char	*warning;
 	int			numFound;
 	int			numEnds;
@@ -408,7 +554,7 @@ int BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
 
 	numFound = BG_ReadPortalEnds( getToken, ends, maxEnds );
 	numEnds = MIN( numFound, maxEnds );
-	BG_CheckPortalEnds( ends, numEnds );
+	BG_CheckPortalEnds( pointContents, ends, numEnds );
 
 	if ( !warn ) {
 		return numEnds;
