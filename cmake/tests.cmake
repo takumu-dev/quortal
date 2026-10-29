@@ -34,6 +34,32 @@ endif()
 
 set(MAP_TESTS "")
 
+# test_sealed has a booth for each rule a portal can break, and one good
+# portal. In each booth the end that breaks the rule is named after it, and
+# the server warns about that end once, naming the rule. It warns about
+# nothing else, and cgame, under developer, warns alike
+set(TEST_SEALED_WARNINGS
+    "unpaired doesn't pair"
+    "own_partner targets itself"
+    "size_mismatch isn't the size of its partner"
+    "no_width has no width"
+    "no_height has no height"
+    "bad_angles has unreadable angles"
+    "angle_and_angles has both angle and angles"
+    "unfilled isn't filled by a plug 64 units deep"
+    "open_behind has no solid world behind its plug"
+    "no_rim has no solid rim around it"
+    "blocked_front has solid just in front of it"
+    "blocked_vis_point has solid at its partner's visibility point"
+    "overlapping overlaps the plug of")
+
+# A warning names the end, then its position, then the rule
+set(TEST_SEALED_WARNING_LINES "")
+foreach(WARNING IN LISTS TEST_SEALED_WARNINGS)
+    string(REGEX REPLACE "^([^ ]+) (.*)$" "\"\\1\" at .* \\2" LINE "${WARNING}")
+    list(APPEND TEST_SEALED_WARNING_LINES "${LINE}")
+endforeach()
+
 if(BUILD_SERVER)
     # Its log names the game code that was loaded: OpenArena's says baseoa
     add_game_test(server_runs_quortal_game_code
@@ -43,32 +69,6 @@ if(BUILD_SERVER)
         ARGS +map test_first +quit
         EXPECT "gamename: ${BASEGAME}")
     list(APPEND MAP_TESTS server_runs_quortal_game_code)
-
-    # test_sealed has a booth for each rule a portal can break, and one good
-    # portal. In each booth the end that breaks the rule is named after it,
-    # and the server warns about that end once, naming the rule. It warns
-    # about nothing else
-    set(TEST_SEALED_WARNINGS
-        "unpaired doesn't pair"
-        "own_partner targets itself"
-        "size_mismatch isn't the size of its partner"
-        "no_width has no width"
-        "no_height has no height"
-        "bad_angles has unreadable angles"
-        "angle_and_angles has both angle and angles"
-        "unfilled isn't filled by a plug 64 units deep"
-        "open_behind has no solid world behind its plug"
-        "no_rim has no solid rim around it"
-        "blocked_front has solid just in front of it"
-        "blocked_vis_point has solid at its partner's visibility point"
-        "overlapping overlaps the plug of")
-
-    # A warning names the end, then its position, then the rule
-    set(TEST_SEALED_WARNING_LINES "")
-    foreach(WARNING IN LISTS TEST_SEALED_WARNINGS)
-        string(REGEX REPLACE "^([^ ]+) (.*)$" "\"\\1\" at .* \\2" LINE "${WARNING}")
-        list(APPEND TEST_SEALED_WARNING_LINES "${LINE}")
-    endforeach()
 
     add_game_test(server_warns_once_per_test_sealed_booth
         GAME ${SERVER_BINARY}
@@ -127,6 +127,19 @@ if(BUILD_CLIENT)
         ARGS +set activeAction quit +devmap test_first
         EXPECT ${RENDER_EXPECT})
     list(APPEND MAP_TESTS client_opens_gl1_with_8_stencil_bits)
+
+    # cgame checks test_sealed's portal ends with the server's own code,
+    # against its own copy of the world, and under developer it prints the
+    # same warnings, once the server has printed them
+    add_game_test(cgame_warns_as_the_server_does
+        GAME ${CLIENT_BINARY}
+        LABEL render
+        TIMEOUT 120
+        ARGS +set developer 1 +set activeAction quit +devmap test_sealed
+        LINES "WARNING: .*portal end"
+        TWICE
+        EXPECT_LINES ${TEST_SEALED_WARNING_LINES})
+    list(APPEND MAP_TESTS cgame_warns_as_the_server_does)
 endif()
 
 if(MAP_TESTS AND NOT Q3MAP2)

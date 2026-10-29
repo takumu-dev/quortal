@@ -8,12 +8,15 @@ include_guard(GLOBAL)
 # EXPECT somewhere in its console log. With LINES, a regular expression, the
 # log's lines that match it must be matched one for one by the regular
 # expressions in EXPECT_LINES, and with no EXPECT_LINES there must be none.
+# With TWICE, those lines are printed twice over, as a client's server and
+# its cgame both print them: the first half of them must be matched so, and
+# the second half must repeat the first.
 #
 # With MAP, a .map file, the map is compiled for the check alone, in its own
 # folder, and the game finds it there before the copy in quortal.pk3. With
 # NO_CUSTINFOPARMS, it's compiled without -custinfoparms
 function(add_game_test NAME)
-    cmake_parse_arguments(ARG "NO_CUSTINFOPARMS" "GAME;LABEL;TIMEOUT;LINES;MAP" "ARGS;EXPECT;EXPECT_LINES" ${ARGN})
+    cmake_parse_arguments(ARG "TWICE;NO_CUSTINFOPARMS" "GAME;LABEL;TIMEOUT;LINES;MAP" "ARGS;EXPECT;EXPECT_LINES" ${ARGN})
 
     set(RUN_GAME_SCRIPT ${CMAKE_SOURCE_DIR}/cmake/utils/run_game.cmake)
 
@@ -50,6 +53,7 @@ function(add_game_test NAME)
             "-DEXPECT=${ARG_EXPECT}"
             "-DLINES=${ARG_LINES}"
             "-DEXPECT_LINES=${ARG_EXPECT_LINES}"
+            -DTWICE=${ARG_TWICE}
             ${MAP_OPTIONS}
             -P ${RUN_GAME_SCRIPT})
 

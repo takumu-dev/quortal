@@ -5,7 +5,10 @@
 # with each of EXPECT somewhere in its console log. When LINES is set, the
 # log's lines that match it must also be those of EXPECT_LINES, one for one:
 # each regular expression in EXPECT_LINES matches exactly one of them, and
-# there are no more of them than there are of EXPECT_LINES
+# there are no more of them than there are of EXPECT_LINES. With TWICE, those
+# lines are printed twice over, as a client's server and then its cgame both
+# print them: the second half of them must repeat the first, line for line,
+# and the first half must be those of EXPECT_LINES
 #
 # Each run starts from an empty RUN_DIR, and writes nothing outside it. The
 # game is given:
@@ -158,6 +161,19 @@ if(LINES)
             list(APPEND MATCHED_LINES "${LINE}")
         endif()
     endforeach()
+
+    if(TWICE)
+        list(LENGTH MATCHED_LINES LINE_COUNT)
+        math(EXPR HALF_COUNT "${LINE_COUNT} / 2")
+        list(SUBLIST MATCHED_LINES 0 ${HALF_COUNT} FIRST_LINES)
+        list(SUBLIST MATCHED_LINES ${HALF_COUNT} -1 SECOND_LINES)
+
+        if(NOT FIRST_LINES STREQUAL SECOND_LINES)
+            list(APPEND FAILURES "the second half of its lines with \"${LINES}\" don't repeat the first")
+        endif()
+
+        set(MATCHED_LINES ${FIRST_LINES})
+    endif()
 
     foreach(EXPECTED IN LISTS EXPECT_LINES)
         set(MATCH_COUNT 0)
