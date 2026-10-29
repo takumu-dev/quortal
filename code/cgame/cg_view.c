@@ -818,6 +818,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_AddMarks();
 		CG_AddParticles ();
 		CG_AddLocalEntities();
+		CG_AddPortalEnds();
 	}
 	CG_AddViewWeapon( &cg.predictedPlayerState );
 

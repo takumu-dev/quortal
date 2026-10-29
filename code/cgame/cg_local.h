@@ -1075,6 +1075,7 @@ typedef struct {
 
 	int				numPortalEnds;
 	portalEnd_t		portalEnds[MAX_PORTAL_ENDS];
+	qhandle_t		portalEndSkins[MAX_PORTAL_ENDS];	// each end's shader, as a skin, or 0 for flat black
 } cgs_t;
 
 //==============================================================================
@@ -1331,6 +1332,7 @@ void CG_LoadDeferredPlayers( void );
 // cg_portal.c
 //
 void CG_ReadPortalEnds( void );
+void CG_AddPortalEnds( void );
 
 
 //
