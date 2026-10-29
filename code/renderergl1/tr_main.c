@@ -1225,6 +1225,17 @@ void R_AddEntitySurfaces (void) {
 			R_AddDrawSurf( &entitySurface, shader, R_SpriteFogNum( ent ), 0 );
 			break;
 
+		case RT_PORTAL:
+			// the end's shader comes as a skin of one shader
+			if ( ent->e.customSkin ) {
+				shader = R_GetSkinByHandle( ent->e.customSkin )->surfaces[0].shader;
+			} else {
+				shader = tr.blackShader;
+			}
+			R_SetupEntityLighting( &tr.refdef, ent );
+			R_AddDrawSurf( &entitySurface, shader, R_SpriteFogNum( ent ), 0 );
+			break;
+
 		case RT_MODEL:
 			// we must set up parts of tr.or for model culling
 			R_RotateForEntity( ent, &tr.viewParms, &tr.or );

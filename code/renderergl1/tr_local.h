@@ -913,6 +913,7 @@ typedef struct {
 	shader_t				*defaultShader;
 	shader_t				*shadowShader;
 	shader_t				*projectionShadowShader;
+	shader_t				*blackShader;			// a portal end with no shader of its own
 
 	shader_t				*flareShader;
 	shader_t				*sunShader;

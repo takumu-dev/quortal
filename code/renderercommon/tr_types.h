@@ -80,6 +80,7 @@ typedef enum {
 	RT_RAIL_RINGS,
 	RT_LIGHTNING,
 	RT_PORTALSURFACE,		// doesn't draw anything, just info for portals
+	RT_PORTAL,				// a portal end's rectangle, at origin along axis, and its partner's frame
 
 	RT_MAX_REF_ENTITY_TYPE
 } refEntityType_t;
@@ -117,6 +118,11 @@ typedef struct {
 	// extra sprite information
 	float		radius;
 	float		rotation;
+
+	// extra portal information
+	float		halfWidth;			// how far the end reaches along axis[1] either side of origin
+	float		halfHeight;			// and along axis[2]
+	orientation_t	partner;		// the frame of the end it pairs with, if it pairs
 } refEntity_t;
 
 

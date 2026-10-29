@@ -181,6 +181,66 @@ static void RB_SurfaceSprite( void ) {
 }
 
 
+// a map's surfaces are usually textured at a scale of 0.5, two texels to a unit
+#define	TEXELS_PER_UNIT		2
+
+/*
+=============
+RB_SurfacePortal
+
+A portal end's rectangle, flush with the surface it lies on. Its shader is
+laid on at the usual scale, the right way round as seen from in front: along
+the end's width and down its height, from the world's origin rather than the
+end's, so that it lines up with a wall around it textured the same way
+=============
+*/
+static void RB_SurfacePortal( void ) {
+	refEntity_t		*e;
+	shaderStage_t	*stage;
+	image_t			*image;
+	vec3_t			left, up;
+	float			s, t;
+	float			halfS, halfT;
+	int				i;
+
+	e = &backEnd.currentEntity->e;
+
+	// the texture coordinates are scaled to the shader's first image that
+	// isn't a lightmap, as the map compiler scales a surface's
+	image = tr.whiteImage;
+	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
+		stage = tess.shader->stages[i];
+		if ( !stage || !stage->active ) {
+			break;
+		}
+		if ( !stage->bundle[0].isLightmap && stage->bundle[0].image[0] ) {
+			image = stage->bundle[0].image[0];
+			break;
+		}
+	}
+
+	// the end's centre, and how far it reaches either side, in texels
+	s = DotProduct( e->origin, e->axis[1] ) * TEXELS_PER_UNIT;
+	t = -DotProduct( e->origin, e->axis[2] ) * TEXELS_PER_UNIT;
+	halfS = e->halfWidth * TEXELS_PER_UNIT;
+	halfT = e->halfHeight * TEXELS_PER_UNIT;
+
+	// seen from in front, the end's width runs to the right
+	VectorScale( e->axis[1], -e->halfWidth, left );
+	VectorScale( e->axis[2], e->halfHeight, up );
+
+	RB_AddQuadStampExt( e->origin, left, up, e->shaderRGBA,
+		( s - halfS ) / image->width, ( t - halfT ) / image->height,
+		( s + halfS ) / image->width, ( t + halfT ) / image->height );
+
+	// the quad faces out of the end. Its light was found in the end's own
+	// axes, as a model's is, so its normal is given in them too
+	for ( i = tess.numVertexes - 4 ; i < tess.numVertexes ; i++ ) {
+		VectorSet( tess.normal[i], 1, 0, 0 );
+	}
+}
+
+
 /*
 =============
 RB_SurfacePolychain
@@ -1068,6 +1128,9 @@ static void RB_SurfaceEntity( surfaceType_t *surfType ) {
 		break;
 	case RT_LIGHTNING:
 		RB_SurfaceLightningBolt();
+		break;
+	case RT_PORTAL:
+		RB_SurfacePortal();
 		break;
 	default:
 		RB_SurfaceAxis();

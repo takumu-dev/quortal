@@ -3115,6 +3115,15 @@ static void CreateInternalShaders( void ) {
 	Q_strncpyz( shader.name, "<stencil shadow>", sizeof( shader.name ) );
 	shader.sort = SS_STENCIL_SHADOW;
 	tr.shadowShader = FinishShader();
+
+	// flat black, whatever the light
+	InitShader( "<black>", LIGHTMAP_NONE );
+	stages[0].bundle[0].image[0] = tr.whiteImage;
+	stages[0].active = qtrue;
+	stages[0].rgbGen = CGEN_CONST;
+	stages[0].constantColor[3] = 255;
+	stages[0].stateBits = GLS_DEFAULT;
+	tr.blackShader = FinishShader();
 }
 
 static void CreateExternalShaders( void ) {
