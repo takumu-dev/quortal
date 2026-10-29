@@ -91,6 +91,23 @@ if(BUILD_SERVER)
             "\"orange\" at .*: open, paired with \"blue\""
             "\"blue\" at .*: open, paired with \"orange\"")
     list(APPEND MAP_TESTS server_finds_test_first_portal_open)
+
+    # Compiled without -custinfoparms, the plug's own surface parameter has
+    # no bit, so nothing fills test_first's openings, and both its ends are
+    # sealed by the plug rule. The map is compiled for this check alone,
+    # never into quortal.pk3
+    add_game_test(server_seals_test_first_compiled_without_custinfoparms
+        GAME ${SERVER_BINARY}
+        LABEL server
+        TIMEOUT 60
+        MAP ${CMAKE_SOURCE_DIR}/data/maps/test_first.map
+        NO_CUSTINFOPARMS
+        ARGS +map test_first +quit
+        LINES "WARNING: .*portal end"
+        EXPECT_LINES
+            "\"orange\" at .* isn't filled by a plug"
+            "\"blue\" at .* isn't filled by a plug")
+    list(APPEND MAP_TESTS server_seals_test_first_compiled_without_custinfoparms)
 endif()
 
 if(BUILD_CLIENT)

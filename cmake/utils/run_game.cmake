@@ -18,6 +18,11 @@
 #     xmessage programs that exit at once, so that an error dialog never
 #     waits for a click. On Windows one waits for the timeout.
 #
+# When MAP_FILE is set, that map is first compiled into the home folder,
+# where the game finds it before the copy in quortal.pk3, by
+# compile_map.cmake with Q3MAP2, DATA_DIR and CUSTINFOPARMS. Its work folder
+# is in RUN_DIR too.
+#
 # The client, when CLIENT is set, opens a 640x480 window without MSAA, and
 # every frame moves the game on by 8 msec, however long it took. On Linux
 # and the BSDs without a display, it runs under xvfb-run, and without that
@@ -36,6 +41,25 @@ get_filename_component(BASE_DIR ${GAME} DIRECTORY)
 file(REMOVE_RECURSE ${RUN_DIR})
 set(HOME_DIR ${RUN_DIR}/home)
 file(MAKE_DIRECTORY ${HOME_DIR})
+
+if(MAP_FILE)
+    get_filename_component(MAP_NAME ${MAP_FILE} NAME_WE)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND}
+            -DQ3MAP2=${Q3MAP2}
+            -DMAP_FILE=${MAP_FILE}
+            -DBSP_FILE=${HOME_DIR}/${BASEGAME}/maps/${MAP_NAME}.bsp
+            -DDATA_DIR=${DATA_DIR}
+            -DGAME_DIR=${BASE_DIR}/${BASEGAME}
+            -DWORK_DIR=${RUN_DIR}/map
+            -DCUSTINFOPARMS=${CUSTINFOPARMS}
+            -P ${CMAKE_CURRENT_LIST_DIR}/compile_map.cmake
+        RESULT_VARIABLE RESULT)
+
+    if(NOT RESULT EQUAL 0)
+        message(FATAL_ERROR "${MAP_NAME} couldn't be compiled for the check")
+    endif()
+endif()
 
 # Windows loads opengl32.dll from the folder of the program it starts
 # before its own, so the client runs from a folder in RUN_DIR, which holds

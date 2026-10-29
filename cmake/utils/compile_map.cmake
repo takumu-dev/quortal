@@ -1,7 +1,8 @@
 # Compile a map with q3map2, through its BSP, vis and light stages
 
 # Q3MAP2, MAP_FILE, BSP_FILE, DATA_DIR, GAME_DIR and WORK_DIR must be set
-# via -D
+# via -D. With CUSTINFOPARMS set OFF, -custinfoparms is left out of every
+# stage, as a build that forgot it would leave it out
 
 # q3map2 reads the shaders and textures in DATA_DIR, quortal's data folder,
 # and OpenArena's common shaders from its paks in GAME_DIR, but not
@@ -15,6 +16,10 @@ foreach(VAR Q3MAP2 MAP_FILE BSP_FILE DATA_DIR GAME_DIR WORK_DIR)
         message(FATAL_ERROR "${VAR} must be set")
     endif()
 endforeach()
+
+if(NOT DEFINED CUSTINFOPARMS)
+    set(CUSTINFOPARMS ON)
+endif()
 
 get_filename_component(NAME ${MAP_FILE} NAME_WE)
 
@@ -44,8 +49,13 @@ set(LOG_FILE ${WORK_DIR}/${NAME}.log)
 # Runs q3map2's STAGE on the map, showing its warnings, or all it printed
 # if it fails
 function(run_stage STAGE)
+    set(OPTIONS ${ARGN})
+    if(NOT CUSTINFOPARMS)
+        list(REMOVE_ITEM OPTIONS -custinfoparms)
+    endif()
+
     execute_process(
-        COMMAND ${Q3MAP2} ${PATH_ARGS} ${STAGE} ${ARGN} ${WORK_DIR}/${NAME}.map
+        COMMAND ${Q3MAP2} ${PATH_ARGS} ${STAGE} ${OPTIONS} ${WORK_DIR}/${NAME}.map
         WORKING_DIRECTORY ${WORK_DIR}
         OUTPUT_VARIABLE OUTPUT
         ERROR_VARIABLE OUTPUT
