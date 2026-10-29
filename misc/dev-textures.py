@@ -50,6 +50,7 @@ LABELS = {
     "angle_and_angles": "purple",
     "unfilled": "purple",
     "open_behind": "purple",
+    "no_rim": "purple",
 }
 
 GLYPHS = {

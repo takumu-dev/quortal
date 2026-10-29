@@ -398,6 +398,13 @@ static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointC
 		return PR_OPEN_BEHIND;
 	}
 
+	// and a solid rim surrounds the opening, just beyond its edges and just
+	// behind its surface
+	if ( !BG_PortalEndLayerHolds( end, pointContents, end->width / 2 + PORTAL_TOLERANCE,
+			end->height / 2 + PORTAL_TOLERANCE, PORTAL_TOLERANCE, qtrue, CONTENTS_SOLID, 0 ) ) {
+		return PR_NO_RIM;
+	}
+
 	return PR_NONE;
 }
 
@@ -511,6 +518,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return va( "isn't filled by a plug %i units deep, flush with its surface", PORTAL_PLUG_DEPTH );
 	case PR_OPEN_BEHIND:
 		return "has no solid world behind its plug";
+	case PR_NO_RIM:
+		return "has no solid rim around it";
 	default:
 		return NULL;
 	}
