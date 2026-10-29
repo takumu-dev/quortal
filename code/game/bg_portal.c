@@ -365,6 +365,7 @@ PORTAL_SAMPLE_SPACING units out from its centre
 ================
 */
 static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointContents)( const vec3_t point ) ) {
+	vec3_t	point;
 	float	halfWidth, halfHeight, halfDepth;
 	int		numDeep;
 	int		i;
@@ -409,6 +410,12 @@ static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointC
 	if ( !BG_PortalEndLayerHolds( end, pointContents, halfWidth, halfHeight,
 			-PORTAL_TOLERANCE, qfalse, 0, CONTENTS_SOLID ) ) {
 		return PR_BLOCKED_FRONT;
+	}
+
+	// and so is its partner's visibility point, in front of it
+	VectorMA( end->origin, PORTAL_VIS_DISTANCE, end->axis[0], point );
+	if ( pointContents( point ) & CONTENTS_SOLID ) {
+		return PR_BLOCKED_VIS_POINT;
 	}
 
 	return PR_NONE;
@@ -528,6 +535,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return "has no solid rim around it";
 	case PR_BLOCKED_FRONT:
 		return "has solid just in front of it";
+	case PR_BLOCKED_VIS_POINT:
+		return va( "has solid at its partner's visibility point, %i units in front of it", PORTAL_VIS_DISTANCE );
 	default:
 		return NULL;
 	}

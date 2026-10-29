@@ -770,8 +770,10 @@ typedef enum {
 	PR_OPEN_BEHIND,
 	PR_NO_RIM,
 
-	// the space just in front of the end is clear of solid
-	PR_BLOCKED_FRONT
+	// the space just in front of the end, and its partner's visibility point
+	// in front of it, are clear of solid
+	PR_BLOCKED_FRONT,
+	PR_BLOCKED_VIS_POINT
 } portalRule_t;
 
 typedef struct {
