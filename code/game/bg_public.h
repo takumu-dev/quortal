@@ -763,6 +763,9 @@ typedef enum {
 	// both ends of a portal are the same size
 	PR_SIZE_MISMATCH,
 
+	// no two ends' plugs overlap
+	PR_PLUG_OVERLAP,
+
 	// the plug fills the opening
 	PR_UNFILLED,
 
@@ -787,6 +790,7 @@ typedef struct {
 	float				height;
 
 	int					partner;				// the end it pairs with, or -1
+	int					overlap;				// an end whose plug its own overlaps, or -1
 	portalEndState_t	state;
 	portalRule_t		rule;					// the rule it broke itself, if any
 	vec3_t				visOrigin;				// where its view is seen from, if it's open
@@ -795,7 +799,7 @@ typedef struct {
 int			BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
 				int (*pointContents)( const vec3_t point ), void (*warn)( const char *warning ),
 				portalEnd_t *ends, int maxEnds );
-const char	*BG_PortalEndRule( const portalEnd_t *end );
+const char	*BG_PortalEndRule( const portalEnd_t *ends, int endNum );
 
 
 #define ARENAS_PER_TIER		4

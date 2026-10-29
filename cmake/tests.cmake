@@ -60,7 +60,8 @@ if(BUILD_SERVER)
         "open_behind has no solid world behind its plug"
         "no_rim has no solid rim around it"
         "blocked_front has solid just in front of it"
-        "blocked_vis_point has solid at its partner's visibility point")
+        "blocked_vis_point has solid at its partner's visibility point"
+        "overlapping overlaps the plug of")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")

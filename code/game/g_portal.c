@@ -79,9 +79,9 @@ void G_ListPortalEnds( void ) {
 		if ( end->state == PE_OPEN ) {
 			verdict = va( "open, paired with \"%s\"", end->target );
 		} else if ( end->state == PE_SKIPPED ) {
-			verdict = va( "skipped: it %s", BG_PortalEndRule( end ) );
+			verdict = va( "skipped: it %s", BG_PortalEndRule( level.portalEnds, i ) );
 		} else if ( end->rule != PR_NONE ) {
-			verdict = va( "sealed: it %s", BG_PortalEndRule( end ) );
+			verdict = va( "sealed: it %s", BG_PortalEndRule( level.portalEnds, i ) );
 		} else {
 			verdict = va( "sealed by its partner \"%s\"", end->target );
 		}

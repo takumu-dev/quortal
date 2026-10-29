@@ -110,6 +110,7 @@ static void BG_ReadPortalEnd( const portalEndKeys_t *keys, portalEnd_t *end ) {
 
 	memset( end, 0, sizeof( *end ) );
 	end->partner = -1;
+	end->overlap = -1;
 
 	Q_strncpyz( end->targetname, keys->targetname, sizeof( end->targetname ) );
 	Q_strncpyz( end->target, keys->target, sizeof( end->target ) );
@@ -261,8 +262,8 @@ static int BG_PairPortalEnd( const portalEnd_t *ends, int numEnds, int endNum, p
 	return partner;
 }
 
-// the world around a portal end is checked to within this distance of where
-// its keys place it
+// a portal end's plug, and the world around it, are checked to within this
+// distance of where its keys place them
 #define	PORTAL_TOLERANCE		1
 
 // and sampled at each edge, and this far apart between them
@@ -423,20 +424,84 @@ static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointC
 
 /*
 ================
+BG_PortalPlugsOverlap
+
+Returns qtrue if the plugs of a and b, as their keys place them, overlap by
+more than PORTAL_TOLERANCE. Each plug is a box, and two boxes are apart when
+some axis separates them, as the shadows they cast on it don't overlap. Only
+the axes of each box, and the cross products of an axis of one with an axis
+of the other, need be tried
+================
+*/
+static qboolean BG_PortalPlugsOverlap( const portalEnd_t *a, const portalEnd_t *b ) {
+	vec3_t	axes[15];
+	vec3_t	extentsA, extentsB;
+	vec3_t	delta;
+	float	reach;
+	int		numAxes;
+	int		i, j;
+
+	// from the centre of a's box to b's, each half the plug's depth behind
+	// its opening's
+	VectorSubtract( b->origin, a->origin, delta );
+	VectorMA( delta, -PORTAL_PLUG_DEPTH / 2, b->axis[0], delta );
+	VectorMA( delta, PORTAL_PLUG_DEPTH / 2, a->axis[0], delta );
+
+	// how far each box reaches from its centre along its own axes
+	VectorSet( extentsA, PORTAL_PLUG_DEPTH / 2, a->width / 2, a->height / 2 );
+	VectorSet( extentsB, PORTAL_PLUG_DEPTH / 2, b->width / 2, b->height / 2 );
+
+	numAxes = 0;
+	for ( i = 0 ; i < 3 ; i++ ) {
+		VectorCopy( a->axis[i], axes[numAxes++] );
+		VectorCopy( b->axis[i], axes[numAxes++] );
+	}
+
+	// the cross product of two parallel axes is no axis at all
+	for ( i = 0 ; i < 3 ; i++ ) {
+		for ( j = 0 ; j < 3 ; j++ ) {
+			CrossProduct( a->axis[i], b->axis[j], axes[numAxes] );
+			if ( VectorNormalize( axes[numAxes] ) > 0.001f ) {
+				numAxes++;
+			}
+		}
+	}
+
+	// along each axis, the shadows overlap by how far the boxes reach
+	// together, less how far apart their centres are
+	for ( i = 0 ; i < numAxes ; i++ ) {
+		reach = 0;
+		for ( j = 0 ; j < 3 ; j++ ) {
+			reach += extentsA[j] * fabs( DotProduct( a->axis[j], axes[i] ) );
+			reach += extentsB[j] * fabs( DotProduct( b->axis[j], axes[i] ) );
+		}
+
+		if ( reach - fabs( DotProduct( delta, axes[i] ) ) <= PORTAL_TOLERANCE ) {
+			return qfalse;
+		}
+	}
+
+	return qtrue;
+}
+
+/*
+================
 BG_CheckPortalEnds
 
 Pairs the ends and checks them, giving each its state, and the rule it broke
 if it broke one. An end is checked against the world around it only once it
-has broken no other rule. A portal is open only when both its ends broke
-none: an end that broke one seals its partner, and an end that was skipped
-as it was read still pairs, to seal its partner
+has broken no other rule. Both ends whose plugs overlap break that rule, so
+that both their portals are sealed. A portal is open only when both its ends
+broke none: an end that broke one seals its partner, and an end that was
+skipped as it was read still pairs, to seal its partner
 ================
 */
 static void BG_CheckPortalEnds( int (*pointContents)( const vec3_t point ), portalEnd_t *ends, int numEnds ) {
 	portalEnd_t		*end;
 	portalEnd_t		*partner;
+	portalEnd_t		*other;
 	portalRule_t	rule;
-	int				i;
+	int				i, j;
 
 	for ( i = 0 ; i < numEnds ; i++ ) {
 		end = &ends[i];
@@ -463,6 +528,30 @@ static void BG_CheckPortalEnds( int (*pointContents)( const vec3_t point ), port
 		}
 		if ( end->width != partner->width || end->height != partner->height ) {
 			end->rule = PR_SIZE_MISMATCH;
+		}
+	}
+
+	// no two plugs overlap, whatever other rules their ends break
+	for ( i = 0 ; i < numEnds ; i++ ) {
+		end = &ends[i];
+		if ( end->state == PE_SKIPPED ) {
+			continue;
+		}
+
+		for ( j = i + 1 ; j < numEnds ; j++ ) {
+			other = &ends[j];
+			if ( other->state == PE_SKIPPED || !BG_PortalPlugsOverlap( end, other ) ) {
+				continue;
+			}
+
+			if ( end->rule == PR_NONE ) {
+				end->rule = PR_PLUG_OVERLAP;
+				end->overlap = j;
+			}
+			if ( other->rule == PR_NONE ) {
+				other->rule = PR_PLUG_OVERLAP;
+				other->overlap = i;
+			}
 		}
 	}
 
@@ -498,10 +587,14 @@ static void BG_CheckPortalEnds( int (*pointContents)( const vec3_t point ), port
 ================
 BG_PortalEndRule
 
-Says which rule end broke, or returns NULL if it broke none
+Says which rule ends[endNum] broke, or returns NULL if it broke none
 ================
 */
-const char *BG_PortalEndRule( const portalEnd_t *end ) {
+const char *BG_PortalEndRule( const portalEnd_t *ends, int endNum ) {
+	const portalEnd_t	*end;
+
+	end = &ends[endNum];
+
 	switch ( end->rule ) {
 	case PR_NO_WIDTH:
 		return "has no width";
@@ -527,6 +620,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return "targets itself";
 	case PR_SIZE_MISMATCH:
 		return va( "isn't the size of its partner \"%s\"", end->target );
+	case PR_PLUG_OVERLAP:
+		return va( "overlaps the plug of \"%s\"", ends[end->overlap].targetname );
 	case PR_UNFILLED:
 		return va( "isn't filled by a plug %i units deep, flush with its surface", PORTAL_PLUG_DEPTH );
 	case PR_OPEN_BEHIND:
@@ -546,15 +641,29 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 ================
 BG_PortalEndWarning
 
-Returns the warning about the rule end broke, naming it and its position, or
-NULL if it broke none. An end sealed by its partner breaks none
+Returns the warning about the rule ends[endNum] broke, naming it and its
+position, or NULL if it broke none. An end sealed by its partner breaks none.
+Two ends whose plugs overlap each other are warned about once, at the end
+whose name sorts first
 ================
 */
-static const char *BG_PortalEndWarning( const portalEnd_t *end ) {
-	static char	warning[MAX_STRING_CHARS];
-	const char	*rule;
+static const char *BG_PortalEndWarning( const portalEnd_t *ends, int endNum ) {
+	static char			warning[MAX_STRING_CHARS];
+	const portalEnd_t	*end;
+	const portalEnd_t	*other;
+	const char			*rule;
 
-	rule = BG_PortalEndRule( end );
+	end = &ends[endNum];
+
+	if ( end->rule == PR_PLUG_OVERLAP ) {
+		other = &ends[end->overlap];
+		if ( other->rule == PR_PLUG_OVERLAP && other->overlap == endNum
+			&& Q_stricmp( other->targetname, end->targetname ) < 0 ) {
+			return NULL;
+		}
+	}
+
+	rule = BG_PortalEndRule( ends, endNum );
 	if ( !rule ) {
 		return NULL;
 	}
@@ -600,7 +709,7 @@ int BG_LoadPortalEnds( qboolean (*getToken)( char *buffer, int bufferSize ),
 	}
 
 	for ( i = 0 ; i < numEnds ; i++ ) {
-		warning = BG_PortalEndWarning( &ends[i] );
+		warning = BG_PortalEndWarning( ends, i );
 		if ( warning ) {
 			warn( warning );
 		}
