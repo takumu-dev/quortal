@@ -405,6 +405,12 @@ static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointC
 		return PR_NO_RIM;
 	}
 
+	// the space just in front of the end is clear of solid
+	if ( !BG_PortalEndLayerHolds( end, pointContents, halfWidth, halfHeight,
+			-PORTAL_TOLERANCE, qfalse, 0, CONTENTS_SOLID ) ) {
+		return PR_BLOCKED_FRONT;
+	}
+
 	return PR_NONE;
 }
 
@@ -520,6 +526,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return "has no solid world behind its plug";
 	case PR_NO_RIM:
 		return "has no solid rim around it";
+	case PR_BLOCKED_FRONT:
+		return "has solid just in front of it";
 	default:
 		return NULL;
 	}

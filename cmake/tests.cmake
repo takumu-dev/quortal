@@ -58,7 +58,8 @@ if(BUILD_SERVER)
         "angle_and_angles has both angle and angles"
         "unfilled isn't filled by a plug 64 units deep"
         "open_behind has no solid world behind its plug"
-        "no_rim has no solid rim around it")
+        "no_rim has no solid rim around it"
+        "blocked_front has solid just in front of it")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")

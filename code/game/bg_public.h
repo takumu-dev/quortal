@@ -768,7 +768,10 @@ typedef enum {
 
 	// solid world lies behind the plug, and a solid rim surrounds the opening
 	PR_OPEN_BEHIND,
-	PR_NO_RIM
+	PR_NO_RIM,
+
+	// the space just in front of the end is clear of solid
+	PR_BLOCKED_FRONT
 } portalRule_t;
 
 typedef struct {

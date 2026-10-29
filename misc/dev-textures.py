@@ -51,6 +51,7 @@ LABELS = {
     "unfilled": "purple",
     "open_behind": "purple",
     "no_rim": "purple",
+    "blocked_front": "purple",
 }
 
 GLYPHS = {
