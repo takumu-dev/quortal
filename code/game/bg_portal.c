@@ -392,6 +392,12 @@ static portalRule_t BG_CheckPortalEndWorld( const portalEnd_t *end, int (*pointC
 		}
 	}
 
+	// solid world lies behind the plug
+	if ( !BG_PortalEndLayerHolds( end, pointContents, halfWidth, halfHeight,
+			PORTAL_PLUG_DEPTH + PORTAL_TOLERANCE, qfalse, CONTENTS_SOLID, 0 ) ) {
+		return PR_OPEN_BEHIND;
+	}
+
 	return PR_NONE;
 }
 
@@ -503,6 +509,8 @@ const char *BG_PortalEndRule( const portalEnd_t *end ) {
 		return va( "isn't the size of its partner \"%s\"", end->target );
 	case PR_UNFILLED:
 		return va( "isn't filled by a plug %i units deep, flush with its surface", PORTAL_PLUG_DEPTH );
+	case PR_OPEN_BEHIND:
+		return "has no solid world behind its plug";
 	default:
 		return NULL;
 	}

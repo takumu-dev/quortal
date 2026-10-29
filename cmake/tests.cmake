@@ -56,7 +56,8 @@ if(BUILD_SERVER)
         "no_height has no height"
         "bad_angles has unreadable angles"
         "angle_and_angles has both angle and angles"
-        "unfilled isn't filled by a plug 64 units deep")
+        "unfilled isn't filled by a plug 64 units deep"
+        "open_behind has no solid world behind its plug")
 
     # A warning names the end, then its position, then the rule
     set(TEST_SEALED_WARNING_LINES "")

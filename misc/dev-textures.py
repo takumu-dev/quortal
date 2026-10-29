@@ -49,6 +49,7 @@ LABELS = {
     "bad_angles": "purple",
     "angle_and_angles": "purple",
     "unfilled": "purple",
+    "open_behind": "purple",
 }
 
 GLYPHS = {

@@ -764,7 +764,10 @@ typedef enum {
 	PR_SIZE_MISMATCH,
 
 	// the plug fills the opening
-	PR_UNFILLED
+	PR_UNFILLED,
+
+	// solid world lies behind the plug
+	PR_OPEN_BEHIND
 } portalRule_t;
 
 typedef struct {
