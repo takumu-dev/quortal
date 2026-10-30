@@ -6,7 +6,7 @@
 
 quortal's first step builds no portal. It builds the game the portals go into: ioquake3, made into a standalone game called quortal, which you build from its source with free tools and run on free data, so that you can follow every later step without owning Quake III Arena.
 
-Its [station](glossary.md#station) is the two rooms of `test_first`, the first test map, one orange and one blue, textured and lit alike. Above, you see each from the same spot in it, facing the thick wall that chapter 2 puts a [portal end](glossary.md#portal-end) in. The blue room is the orange room turned half round and moved 1024 units along, so apart from their colour, the two pictures are the same. That's what a portal between the rooms needs: standing in one, you'll see the other through the wall, and only the colour will show you where the opening is.
+Its [station](glossary.md#station) is the two rooms of `test_first`, the first test map, one orange and one blue, textured and lit alike. Above, you see each from the same spot in it, facing the thick wall that [chapter 2](02-portal-ends-in-a-map.md) puts a [portal end](glossary.md#portal-end) in. The blue room is the orange room turned half round and moved 1024 units along, so apart from their colour, the two pictures are the same. That's what a portal between the rooms needs: standing in one, you'll see the other through the wall, and only the colour will show you where the opening is.
 
 Standing there, you're running quortal's own game code, not OpenArena's, on ioquake3's OpenGL 1 renderer, GL1, in a window with 8 stencil bits. None of it shows in the pictures, but every later step relies on it, and this chapter is about how quortal makes sure of it.
 
@@ -257,7 +257,7 @@ A QVM for a pk3 is built into the pk3's own build folder, at its path in the pk3
 
 That matters, because while the server isn't pure, a game folder's loose files are searched before its pk3s, and a loose `vm/qagame.qvm` beside the binaries would be loaded in place of the one in `quortal.pk3`. With none there, each module comes from the same file either way.
 
-[`add_pk3`](../cmake/utils/add_pk3.cmake) zips `quortal.pk3` from the files built for it, the QVMs and the compiled test maps, and from every file in [data](../data) but the `.map` sources: quortal's textures, and [CREDITS.txt](../data/CREDITS.txt), which credits OpenArena. [make_pk3.cmake](../cmake/utils/make_pk3.cmake) gathers them afresh in a staging folder each time, then zips that with CMake alone, as `quortal.pk3.part` beside the old pk3, and only once it's whole moves it over the old one, so that a game running from the build tree never opens a pk3 half written, in [make_pk3.cmake](../cmake/utils/make_pk3.cmake):
+[`add_pk3`](../cmake/utils/add_pk3.cmake) zips `quortal.pk3` from the files built for it, the QVMs and the compiled test maps, and from every file in [data](../data) but the `.map` sources, such as quortal's textures, and [CREDITS.txt](../data/CREDITS.txt), which credits OpenArena. [make_pk3.cmake](../cmake/utils/make_pk3.cmake) gathers them afresh in a staging folder each time, then zips that with CMake alone, as `quortal.pk3.part` beside the old pk3, and only once it's whole moves it over the old one, so that a game running from the build tree never opens a pk3 half written, in [make_pk3.cmake](../cmake/utils/make_pk3.cmake):
 
 ```cmake
 # Zip it beside the pk3 and then move it over the pk3, so that a game
@@ -317,26 +317,26 @@ run_stage(-vis)
 run_stage(-light -fast -samples 2 -custinfoparms)
 ```
 
-`-custinfoparms` reads `custinfoparms.txt`, where chapter 2 gives the plug a surface parameter of its own. Until then there's no such file, and q3map2 does without. No bot navigation file, `.aas`, is made, since the test maps have no bots. q3map2 reads quortal's [data](../data) folder and OpenArena's paks, for OpenArena's `common` shaders such as `common/caulk`, so the maps can't be compiled until the `openarena` target has fetched them.
+`-custinfoparms` reads `custinfoparms.txt`, where [chapter 2](02-portal-ends-in-a-map.md) gives the plug a surface parameter of its own. No bot navigation file, `.aas`, is made, since the test maps have no bots. q3map2 reads quortal's [data](../data) folder and OpenArena's paks, for OpenArena's `common` shaders such as `common/caulk`, so the maps can't be compiled until the `openarena` target has fetched them.
 
-[dev-textures.py](../misc/dev-textures.py) draws quortal's dev textures, in [data/textures/quortal](../data/textures/quortal). Each is a 64-unit grid with a tick every 8 units, in one of eight colours, so that each room can have its own. On the walls, an arrow and the label UP point to the top, so that a picture always shows which way is up, even through a portal end turned on its side.
+[dev-textures.py](../misc/dev-textures.py) draws quortal's dev textures, in [data/textures/quortal](../data/textures/quortal). Each wall and floor texture is a 64-unit grid with a tick every 8 units, in one of eight colours, so that each room can have its own. On the walls, an arrow and the label UP point to the top, so that a picture always shows which way is up, even through a portal end turned on its side.
 
 [test_first.map](../data/maps/test_first.map) is two rooms, each 512 by 512 units and 256 high. The blue room is the orange room turned half round and moved 1024 units along x, with its four lights moved with it, so that the two are lit alike. Each has one wall 128 units thick, for a portal end: the orange room's north wall, and the blue room's south wall.
 
 ### The docs
 
-The README at the top of the source is quortal's own now, and ioquake3's moves to [ioquake3-readme.md](ioquake3-readme.md). The [docs index](README.md) starts you at `test_first` and lists the chapters, the [glossary](glossary.md) says what the words they use mean, and two how-tos, [Building and running](how-to/building-and-running.md) and [Stepping through the game code](how-to/stepping-through-the-game-code.md), go into what the chapters only touch on. [CC-BY-4.0.txt](../CC-BY-4.0.txt), the legal code of CC BY 4.0, sits beside [COPYING.txt](../COPYING.txt), the GPL's, and its name has neither "licence" nor "copying" in it, so that GitHub still shows quortal's licence as the GPL. ioquake3's `.gitignore` ignored every path with a part starting `build`, the how-to on building among them, so now it ignores only the build trees at the top of the source.
+The README at the top of the source is quortal's own now, and ioquake3's moves to [ioquake3-readme.md](ioquake3-readme.md). The [docs index](README.md) starts you at `test_first` and lists the chapters, the [glossary](glossary.md) says what the words they use mean, and this step's two how-tos, [Building and running](how-to/building-and-running.md) and [Stepping through the game code](how-to/stepping-through-the-game-code.md), go into what the chapters only touch on. [CC-BY-4.0.txt](../CC-BY-4.0.txt), the legal code of CC BY 4.0, sits beside [COPYING.txt](../COPYING.txt), the GPL's, and its name has neither "licence" nor "copying" in it, so that GitHub still shows quortal's licence as the GPL. ioquake3's `.gitignore` ignored every path with a part starting `build`, the how-to on building among them, so now it ignores only the build trees at the top of the source.
 
 ### The checks
 
-Every check is a CTest test, labelled in [tests.cmake](../cmake/tests.cmake) by what it needs: `docs`, `server` or `render`. Two run the game, through [`add_game_test`](../cmake/utils/add_game_test.cmake) and [run_game.cmake](../cmake/utils/run_game.cmake). Each run gets:
+Every check is a CTest test, labelled in [tests.cmake](../cmake/tests.cmake) by what it needs: `docs`, `server` or `render`. This step's first two run the game, through [`add_game_test`](../cmake/utils/add_game_test.cmake) and [run_game.cmake](../cmake/utils/run_game.cmake). Each run gets:
 
 - a fresh home folder, so that no config of yours is read;
 - `logfile 2`, so that the console log is written as it's printed;
 - a timeout;
 - on Linux, stand-ins for `zenity`, `kdialog` and `xmessage` that exit at once, since an error would otherwise wait in a dialog for a click nobody can make.
 
-A check passes when the game exits cleanly with each line it expects in its console log. The server's, in [tests.cmake](../cmake/tests.cmake):
+Each of this step's checks passes when the game exits cleanly with each line it expects in its console log. The server's, in [tests.cmake](../cmake/tests.cmake):
 
 ```cmake
 if(BUILD_SERVER)
@@ -350,15 +350,15 @@ if(BUILD_SERVER)
     list(APPEND MAP_TESTS server_runs_quortal_game_code)
 ```
 
-qagame prints its `gamename` as it starts, and OpenArena's says `baseoa`. The client's check, [`client_opens_gl1_with_8_stencil_bits`](../cmake/tests.cmake), starts the client on `test_first` with [`activeAction`](../code/client/cl_main.c) set to `quit`, which runs once it has drawn its first frame in the game, and expects `renderer_opengl1` and `stencil(8-bits)` in its log.
+qagame prints its `gamename` as it starts, and OpenArena's says `baseoa`. The step's check of the client, [`client_opens_gl1_with_8_stencil_bits`](../cmake/tests.cmake), starts the client on `test_first` with [`activeAction`](../code/client/cl_main.c) set to `quit`, which runs once it has drawn its first frame in the game, and expects `renderer_opengl1` and `stencil(8-bits)` in its log.
 
-The third check, [`docs_hold_true`](../cmake/tests.cmake), runs [check_docs.cmake](../cmake/utils/check_docs.cmake), which keeps this chapter true. Every relative link must lead somewhere. Every identifier linked as code, like [`VM_Create`](../code/qcommon/vm.c), must be in the file it links to. Every excerpt must be whole lines of the file linked just above it. And every commit under "How it was built" must be in the history. [list_commits.cmake](../cmake/utils/list_commits.cmake) prints that list.
+The step's third check, [`docs_hold_true`](../cmake/tests.cmake), runs [check_docs.cmake](../cmake/utils/check_docs.cmake), which keeps this chapter true. Every relative link must lead somewhere. Every identifier linked as code, like [`VM_Create`](../code/qcommon/vm.c), must be in the file it links to. Every excerpt must be whole lines of the file linked just above it. And every commit under "How it was built" must be in the history. [list_commits.cmake](../cmake/utils/list_commits.cmake) prints that list.
 
 CircleCI runs the checks, as [config.yml](../.circleci/config.yml) says, in four jobs. `docs` runs the docs check. `linux` and `windows` build quortal, fetch OpenArena's data and q3map2, build the test maps and run every check, rendering with llvmpipe: on Linux from Ubuntu's Mesa, under `xvfb-run`, and on Windows from mesa-dist-win, whose DLLs the checks put beside the client. `macos` only builds, since there's no q3map2 to fetch there. A push runs `docs` and `linux` at once, while `windows` and `macos`, which cost far more, wait to be approved, and run every time on develop and on tags. ioquake3's own GitHub Actions workflow is gone, so its builds, and its publishing of releases, never run for quortal.
 
 ## Try it
 
-`test_first`'s two rooms are the only station so far. Start in the orange room:
+The step's station is `test_first`'s two rooms. Start in the orange room:
 
 ```sh
 build/Release/quortal.x86_64 +devmap test_first
@@ -403,11 +403,11 @@ That's what you'd be playing without `quortal.pk3`. Put it back.
 
 **The stencil.** `gfxinfo` prints what OpenGL gave the window, and `PIXELFORMAT: color(24-bits) Z(24-bit) stencil(8-bits)` is the line that matters. Start with `+set r_stencilbits 0`, and the console warns that `portal views need 8 stencil bits, the display gave 0`. Set `cg_shadows 2`, and it says it's using blob shadows instead, and `cg_shadows` reads 1 again.
 
-**The checks.** `ctest --test-dir build` runs all three, and `ctest --test-dir build -L render` runs only the client's.
+**The checks.** `ctest --test-dir build` runs every check, and `ctest --test-dir build -L render` runs only those that start the client.
 
 ## Limits
 
-- **There's no portal yet.** `test_first`'s thick walls are plain walls. Chapter 2 puts a portal's ends in them.
+- **This step builds no portal.** [Chapter 2](02-portal-ends-in-a-map.md) puts a portal's ends in `test_first`'s thick walls.
 - **Portals are GL1's alone.** GL2's source stays, but it isn't built, and nothing of quortal's reaches it.
 - **Stencil shadows are gone for good.** `cg_shadows 2` gives blob shadows.
 - **OpenArena's gaps stay.** `oa_dm1`'s music, the second models of the armour shard, the medkit and invisibility, the single-player postgame's music, sounds and podium, and `windfly.wav` are missing, and quortal's test maps avoid them all.

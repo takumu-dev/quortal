@@ -20,6 +20,10 @@ The rigid movement that carries whatever goes into one portal end out of the oth
 
 What you see through a portal end: the far side, as it would look from where your eye would be had it passed through the portal. A portal view can hold more portal views, down to a nesting limit.
 
+### Visibility point
+
+The point that what's seen through a portal end is worked out from: what the server sends of the far side, and what the renderer draws of it. It lies 8 units in front of the end's partner, and it's worked out from the ends, never placed by the map's author.
+
 ### Seam
 
 A visible break where a portal view meets the world around its portal end. A seam that comes from the map's light falling differently on the two ends is a lighting seam.
@@ -75,6 +79,18 @@ A zip file of game data, such as maps, textures, shaders and QVMs, in a game fol
 ### Pure server
 
 A server that gives its clients the list of the pk3s it has loaded, so that they load only from those, and everyone plays the same data and game code. [`sv_pure`](../code/server/sv_init.c) is 1 by default, in single player too.
+
+### Entity
+
+Anything in a map besides its world of brushes, such as the player's start, a light, an item or a door: a list of keys and values, whose `classname` says what it is. A point entity is placed at a point, while a brush entity owns brushes, which the map compiler makes into a model of their own. The compiled map keeps the entities' keys as text, the entity string, which the game reads as the map starts, leaving out only those the compiler uses up itself, such as most lights.
+
+### Contents
+
+The bits that say what a brush is, such as solid, water or lava, set by the shaders on its faces. A trace, which moves a box along a line through the world until it hits something, is given a mask of contents bits, and stops only at brushes whose contents share a bit with it.
+
+### Shader
+
+A surface's script: the images it draws, and how, and the surface parameters that the map compiler reads, such as which contents a brush with it on its faces has. A texture with no script of its own is drawn as a plain image.
 
 ### Stencil buffer
 

@@ -25,6 +25,7 @@ There's one chapter for each step, in the order the history builds them. Each op
 Each identifier a chapter names links to the file it's in, and each excerpt is quoted whole from the file linked just above it. The docs check, which CI and `ctest` run, keeps both true as the code changes, and keeps each chapter's commits in the history.
 
 1. [quortal on ioquake3](01-quortal-on-ioquake3.md): ioquake3 made into a standalone game, quortal, that runs on OpenArena's free data, with its own game code in `quortal.pk3`, and GL1 as its only renderer, keeping the 8 stencil bits that portal views need.
+2. [Portal ends in a map](02-portal-ends-in-a-map.md): portal ends placed by a map's author, each an entity with a plug filling its opening, read and checked alike by the server and the client as the map loads, and sealed, as painted walls, when the map gets them wrong.
 
 The rest each come as the last commit of their step.
 
