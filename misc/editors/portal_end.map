@@ -1,0 +1,25 @@
+// A finished portal end, to copy into a map: an info_portal_end facing east,
+// and its plug, a world brush filling the opening 64 units deep behind it
+// entity 0
+{
+"classname" "worldspawn"
+// brush 0
+{
+( -64 -32 0 ) ( -64 -31 0 ) ( -64 -32 1 ) quortal/plug 0 0 0 -0.5 0.5 0 0 0
+( -64 -32 0 ) ( -64 -32 1 ) ( -63 -32 0 ) quortal/plug 0 0 0 0.5 0.5 0 0 0
+( -64 -32 0 ) ( -63 -32 0 ) ( -64 -31 0 ) quortal/plug 0 0 0 0.5 0.5 0 0 0
+( 0 32 128 ) ( 0 33 128 ) ( 1 32 128 ) quortal/plug 0 0 0 0.5 0.5 0 0 0
+( 0 32 128 ) ( 1 32 128 ) ( 0 32 129 ) quortal/plug 0 0 0 -0.5 0.5 0 0 0
+( 0 32 128 ) ( 0 32 129 ) ( 0 33 128 ) quortal/plug 0 0 0 0.5 0.5 0 0 0
+}
+}
+// entity 1
+{
+"classname" "info_portal_end"
+"origin" "0 0 64"
+"angles" "0 0 0"
+"width" "64"
+"height" "128"
+"targetname" "a"
+"target" "b"
+}
