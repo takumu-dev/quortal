@@ -32,6 +32,7 @@ The rest each come as the last commit of their step.
 
 - [Building and running](how-to/building-and-running.md): what you need, building and running quortal, running its checks, fetching OpenArena's data by hand, and where q3map2 comes from on each platform.
 - [Stepping through the game code](how-to/stepping-through-the-game-code.md): running the game code's native libraries in place of its QVMs, in a debugger.
+- [Placing portals in a map](how-to/placing-portals-in-a-map.md): setting up NetRadiant-custom or TrenchBroom for quortal, copying a finished portal end into a map, and placing ends so that their portals work and look right.
 
 ## Reading alongside the history
 
