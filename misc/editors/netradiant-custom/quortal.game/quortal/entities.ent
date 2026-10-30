@@ -11,7 +11,8 @@ endings:
 
 quortal's game code is ioquake3's, built without Team Arena, so the entities
 of Team Arena, and OpenArena's own, are taken out. q3map2's own entities are
-kept, since quortal's maps are built with it.
+kept, since quortal's maps are built with it. quortal's own, info_portal_end,
+is added
 -->
 <classes>
   <group name="_decal" color="0 1.0 0" model="">
@@ -753,6 +754,20 @@ Limited equivelant to info_player_deathmatch. Use that one instead.
 <target key="target" name="Target">All entities with a matching targetname will be used.</target>
 -------- SPAWNFLAGS --------
 -------- NOTES --------
+  </point>
+  <point name="info_portal_end" color="0 0.5 1" box="-8 -8 -8 8 8 8" model="">
+One end of a portal: a rectangle lying flat on a surface of solid world, seen and entered from its front. Its origin is the centre of the opening, on the surface. The opening is filled by a plug, a world brush with the textures/quortal/plug shader on every face, flush with the surface and 64 units deep.
+-------- KEYS --------
+<angles key="angles" name="Pitch Yaw Roll">The end's facing, read as misc_model reads it: the end faces forward, and its height runs up. Default: 0 0 0, an upright end facing east.</angles>
+<angle key="angle" name="Yaw Angle">Yaw alone, in place of angles, for an upright end. An end with both is skipped.</angle>
+<real key="width" name="Width">The opening's width. Required, and the same as its partner's.</real>
+<real key="height" name="Height">The opening's height. Required, and the same as its partner's.</real>
+<targetname key="targetname" name="Target Name">The end's name.</targetname>
+<target key="target" name="Target">The name of the end it pairs with, which must target this one.</target>
+<texture key="shader" name="Shader">What the end shows when its portal is sealed, or past the nesting limit, by its full name, such as textures/quortal/wall_gray. Default: black.</texture>
+-------- SPAWNFLAGS --------
+-------- NOTES --------
+A portal the map gets wrong is sealed: each of its ends shows its shader, and stops the player like a wall. The server prints a warning naming the end and the rule it breaks.
   </point>
   <point name="item_armor_body" color="0.3 0.3 1" box="-16 -16 -16 16 16 16" model="models/powerups/armor/armor_red.md3">
 Body Armor.
