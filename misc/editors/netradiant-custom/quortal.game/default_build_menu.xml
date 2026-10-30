@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  quortal's build menu, which compiles a map as quortal's build compiles its
+  test maps, with NetRadiant-custom's own q3map2. -custinfoparms, given to
+  the BSP and light stages, gives quortal's own surface parameter, the
+  plug's, its contents bit: without it, nothing fills a portal end's opening,
+  and every portal in the map is sealed. vis keeps the map's .prt file,
+  which the prtview plugin shows, so that you can see where each cluster
+  ends
+-->
+<project version="2.0">
+	<var name="q3map2">"[RadiantPath]q3map2.[ExecutableType]" -v<cond value="[MonitorAddress]"> -connect [MonitorAddress]</cond> -game quake3 -fs_basepath "[EnginePath]" -fs_basegame quortal</var>
+	<build name="quortal: bsp, vis and light">
+		<command>[q3map2] -bsp -meta -leaktest -custinfoparms "[MapFile]"</command>
+		<command>[q3map2] -vis -saveprt "[MapFile]"</command>
+		<command>[q3map2] -light -fast -samples 2 -custinfoparms "[MapFile]"</command>
+	</build>
+	<build name="quortal: only entities">
+		<command>[q3map2] -onlyents "[MapFile]"</command>
+	</build>
+</project>
