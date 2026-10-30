@@ -65,6 +65,6 @@ In this folder, this index, the glossary, the chapters, the how-tos and the [scr
 
 quortal's own prose and diagrams are under the Creative Commons Attribution 4.0 International licence, [CC BY 4.0](../CC-BY-4.0.txt), so that you can reuse them, in a course, a book or a slide, as long as you credit quortal. They're the `README.md` at the top of the source, this index, the glossary, the chapters, the how-tos, and their figures.
 
-Everything else is under the GNU General Public License, version 2 or (at your option) any later version, whose text is in [COPYING.txt](../COPYING.txt). That's the code, including any code the docs quote, quortal's game data, which [CREDITS.txt](../data/CREDITS.txt) credits, the screenshots, which show the game's data, and ioquake3's readmes. The libraries in `code/thirdparty`, and the lcc compiler in `code/tools/lcc`, keep their own licences.
+Everything else is under the GNU General Public License, version 2 or (at your option) any later version, whose text is in [COPYING.txt](../COPYING.txt). That's the code, including any code the docs quote, quortal's game data, which [CREDITS.txt](../data/CREDITS.txt) credits, the screenshots, which show the game's data, and ioquake3's readmes. The libraries in `code/thirdparty`, the lcc compiler in `code/tools/lcc`, and the map editors' entity definitions, which are the OpenArena gamepack's, keep their own licences.
 
 A change to a file takes that file's licence.
