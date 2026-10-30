@@ -4,6 +4,9 @@
 # via -D. With CUSTINFOPARMS set OFF, -custinfoparms is left out of every
 # stage, as a build that forgot it would leave it out
 
+# The map editors' compile commands, in misc/editors, run the same stages
+# with the same options, so a change to them here belongs there too
+
 # q3map2 reads the shaders and textures in DATA_DIR, quortal's data folder,
 # and OpenArena's common shaders from its paks in GAME_DIR, but not
 # quortal.pk3 there, which may hold older copies of quortal's own. MAP_FILE
